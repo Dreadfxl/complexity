@@ -193,9 +193,18 @@ export class MCPInterceptor {
     }
   }
 
-  // Public methods for settings UI
+  // Public methods for settings UI and background script
   getSettings(): Settings {
     return { ...this.settings };
+  }
+
+  getStatus(): { initialized: boolean; enabled: boolean; sources: string[]; patchingActive: boolean } {
+    return {
+      initialized: this.isInitialized,
+      enabled: this.settings.enabled,
+      sources: [...this.sources],
+      patchingActive: this.originalFetch !== null
+    };
   }
 
   async updateSettings(newSettings: Partial<Settings>): Promise<void> {
