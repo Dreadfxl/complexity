@@ -108,38 +108,49 @@ export default function CustomConnectorsSettings() {
       }
 
       const server = config.servers[0]; // Test first server
-      const testPayload = {
-        jsonrpc: '2.0',
-        id: Date.now(),
-        method: 'health_check',
-        params: {}
-      };
-
-      console.log('[CustomConnectors] Testing connection to:', server.transport.url);
-      console.log('[CustomConnectors] Test payload:', testPayload);
-
-      const response = await fetch(server.transport.url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(testPayload),
-      });
-
-      const responseData = await response.text();
-      console.log('[CustomConnectors] Server response:', responseData);
-
-      if (response.ok) {
-        setTestStatus(`✓ Connection successful to ${server.name}`);
+      
+      console.log('[CustomConnectors] Sending test request to background for:', server.transport.url);
+      
+      // Send message to background script to perform the test
+      // Background script has the proper permissions to make cross-origin requests
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        chrome.runtime.sendMessage(
+          {
+            type: 'TEST_MCP_CONNECTION',
+            data: {
+              url: server.transport.url,
+              name: server.name
+            }
+          },
+          (response) => {
+            console.log('[CustomConnectors] Background response:', response);
+            
+            if (chrome.runtime.lastError) {
+              console.error('[CustomConnectors] Runtime error:', chrome.runtime.lastError);
+              setTestStatus('✗ Extension communication error');
+            } else if (response?.success) {
+              if (response.data?.status === 'success') {
+                setTestStatus(`✓ ${response.data.message}`);
+              } else {
+                setTestStatus(`✗ ${response.data?.message || 'Connection failed'}`);
+              }
+            } else {
+              setTestStatus(`✗ ${response?.error || 'Unknown error'}`);
+            }
+            
+            setTimeout(() => setTestStatus(''), 5000);
+          }
+        );
       } else {
-        setTestStatus(`✗ Server error: ${response.status}`);
+        // Fallback for non-extension environment (shouldn't happen in production)
+        setTestStatus('✗ Extension API not available');
+        setTimeout(() => setTestStatus(''), 3000);
       }
     } catch (error) {
-      console.error('[CustomConnectors] Test connection failed:', error);
-      setTestStatus(`✗ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('[CustomConnectors] Test connection setup failed:', error);
+      setTestStatus(`✗ Configuration error: ${error instanceof Error ? error.message : 'Invalid JSON'}`);
+      setTimeout(() => setTestStatus(''), 5000);
     }
-
-    setTimeout(() => setTestStatus(''), 5000);
   };
 
   return (
@@ -173,7 +184,7 @@ export default function CustomConnectorsSettings() {
         <textarea
           value={configJson}
           onChange={(e) => handleConfigChange(e.target.value)}
-          placeholder={`Example:\n{\n  "servers": [\n    {\n      "name": "chrome-devtools",\n      "transport": {\n        "type": "http",\n        "url": "http://localhost:8080/mcp"\n      }\n    }\n  ]\n}`}
+          placeholder={`Example:\n{\n  "servers": [\n    {\n      "name": "simple-timeserver",\n      "transport": {\n        "type": "http",\n        "url": "https://mcp.andybrandt.net/timeserver"\n      }\n    }\n  ]\n}`}
           className="w-full h-48 p-3 border border-gray-300 rounded-md font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
@@ -212,12 +223,19 @@ export default function CustomConnectorsSettings() {
       <div className="bg-blue-50 p-4 rounded-md">
         <h3 className="font-medium text-blue-900 mb-2">How to use:</h3>
         <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-          <li>Start your MCP server (e.g., <code className="bg-blue-100 px-1 rounded">npx -y chrome-devtools-mcp@latest</code>)</li>
-          <li>Paste the server configuration JSON above</li>
+          <li>Paste your MCP server configuration JSON above (see example)</li>
           <li>Click <strong>"Test Connection"</strong> to verify it works</li>
           <li>Enable the toggle and save configuration</li>
           <li>Visit Perplexity AI and perform searches to see custom tools in action</li>
         </ol>
+        
+        <div className="mt-3 p-3 bg-blue-100 rounded text-xs">
+          <p className="font-medium mb-1">Example MCP Servers:</p>
+          <ul className="space-y-1">
+            <li>• <code>https://mcp.andybrandt.net/timeserver</code> - Simple timeserver</li>
+            <li>• <code>http://localhost:8080/mcp</code> - Local chrome-devtools-mcp</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
