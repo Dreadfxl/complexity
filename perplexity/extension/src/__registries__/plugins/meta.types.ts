@@ -1,7 +1,7 @@
 import type { Transaction } from "dexie";
 import type Dexie from "dexie";
 import type z from "zod";
-
+import type { settingsSchema as customConnectorsSchema } from '@/plugins/custom-connectors/index.manifest';
 import type { CorePluginId } from "@/__registries__/core-plugins/types";
 import type { UiGroupId } from "@/__registries__/cs-ui/types";
 import type {
@@ -44,22 +44,16 @@ export type PluginMetaMap = {
   [K in PluginId]: PluginMeta<K>;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface PluginsSettingsRegistry {}
+export interface PluginsSettingsRegistry {
+  'custom-connectors': z.infer<typeof customConnectorsSchema>;
+}
 
-/**
- * Derived type that maps plugin IDs to their settings schemas.
- */
 export type PluginsSettingsSchema = {
   [K in keyof PluginsSettingsRegistry]: PluginsSettingsRegistry[K];
 };
 
-/**
- * Union type of all registered plugin IDs.
- */
 export type PluginId = keyof PluginsSettingsRegistry;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginsIndexedDbRegistry {}
 
 export type PluginsIndexedDbSchema = {
@@ -84,7 +78,6 @@ export type PluginIndexedDbConfig = {
   schema?: z.ZodType<unknown>;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginsDbDataRegistry {}
 
 export type PluginsDbDataSchema = {
