@@ -1,27 +1,52 @@
 import React from "react";
 
-import { createPortal } from "react-dom";
-
+import { Portal } from "@/components/ui/portal";
 import { ExtensionSettingsService } from "@/services/infra/extension-api-wrappers/extension-settings";
+import { useThreadDomObserverStore } from "@/plugins/__core__/dom-observers/thread/store";
 
 import { SourceForensicsAnalyzer } from "./components/SourceForensicsAnalyzer";
-import { useCreatePortalContainer } from "./useCreatePortalContainer";
 
-export default function SourceForensicsWrapper() {
+function SourceForensicsWrapper() {
   const settings = ExtensionSettingsService.cachedSync;
 
-  const container = useCreatePortalContainer({
-    id: "cplx-source-forensics",
-    selector: '[data-testid="thread-header"]',
-    position: "append",
-  });
+  // Use the thread DOM observer to get a reliable container
+  const $overflowMenuButtonWrapper = useThreadDomObserverStore(
+    (state) => state.$overflowMenuButtonWrapper,
+    deepEqual,
+  );
 
-  if (!settings?.plugins.sourceForensics?.enabled || !container) {
+  const portalContainer = (() => {
+    if ($overflowMenuButtonWrapper == null || !$overflowMenuButtonWrapper[0]) {
+      return null;
+    }
+
+    const $wrapper = $($overflowMenuButtonWrapper[0]).parent();
+    const containerId = 'cplx-source-forensics-container';
+    
+    let $existingContainer = $wrapper.find(`#${containerId}`);
+    
+    if ($existingContainer.length) {
+      return $existingContainer[0];
+    }
+
+    const $portalContainer = $(`<div id="${containerId}" style="display: contents;"></div>`);
+    $wrapper.append($portalContainer);
+
+    return $portalContainer[0];
+  })();
+
+  if (!settings?.plugins.sourceForensics?.enabled || !portalContainer) {
     return null;
   }
 
-  return createPortal(
-    <SourceForensicsAnalyzer settings={settings.plugins.sourceForensics} />,
-    container,
+  return (
+    <Portal container={portalContainer}>
+      <SourceForensicsAnalyzer settings={settings.plugins.sourceForensics} />
+    </Portal>
   );
 }
+
+SourceForensicsWrapper.displayName = 'SourceForensicsWrapper';
+
+export default SourceForensicsWrapper;
+export const uiGroup = 'global';

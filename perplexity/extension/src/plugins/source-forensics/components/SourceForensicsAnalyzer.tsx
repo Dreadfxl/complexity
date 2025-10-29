@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipContent, TooltipTrigger, TooltipRoot } from "@/components/ui/tooltip";
 
 import type { SourceForensicsSettings, SourceMapping, SourceContribution } from "../types";
 import { analyzeSourceMappings, calculateContributionScores } from "../utils/analyzer";
@@ -26,10 +26,14 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
   const [highlightedText, setHighlightedText] = useState<string | null>(null);
 
   const analyzeMessage = useCallback(() => {
-    const messageElement = document.querySelector('[data-testid="thread-message"]');
-    if (!messageElement) return;
+    // Look for the main thread container
+    const threadContainer = document.querySelector('[data-testid="thread"]') || 
+                           document.querySelector('main') ||
+                           document.body;
+    
+    if (!threadContainer) return;
 
-    const mappings = analyzeSourceMappings(messageElement);
+    const mappings = analyzeSourceMappings(threadContainer);
     const contributions = calculateContributionScores(mappings);
     
     setSourceMappings(mappings);
@@ -135,6 +139,10 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
         [data-sf-text-id]:hover {
           background-color: rgba(59, 130, 246, 0.1);
         }
+        
+        #cplx-source-forensics-container {
+          margin-left: 8px;
+        }
       `;
       document.head.appendChild(style);
     }
@@ -148,15 +156,15 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
   }, [settings.highlightColor]);
 
   return (
-    <div className="x:flex x:items-center x:gap-2 x:mt-2 x:p-2 x:border x:border-gray-200 x:rounded-md x:bg-gray-50">
+    <div className="x:flex x:items-center x:gap-2 x:p-2 x:border x:border-gray-200 x:rounded-md x:bg-gray-50 x:text-sm">
       <Button
         variant="outline"
         size="sm"
         onClick={() => setIsActive(!isActive)}
-        className={`x:gap-2 ${isActive ? 'x:bg-blue-100 x:border-blue-300' : ''}`}
+        className={`x:gap-2 x:text-xs ${isActive ? 'x:bg-blue-100 x:border-blue-300' : ''}`}
       >
-        {isActive ? <TablerEyeOff className="x:w-4 x:h-4" /> : <TablerEye className="x:w-4 x:h-4" />}
-        {isActive ? 'Disable' : 'Enable'} Source Forensics
+        {isActive ? <TablerEyeOff className="x:w-3 x:h-3" /> : <TablerEye className="x:w-3 x:h-3" />}
+        {isActive ? 'Disable' : 'Enable'} Forensics
       </Button>
 
       {isActive && (
@@ -166,24 +174,26 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
               variant="outline"
               size="sm"
               onClick={() => setShowVisualMap(!showVisualMap)}
-              className="x:gap-2"
+              className="x:gap-2 x:text-xs"
             >
-              <TablerMap className="x:w-4 x:h-4" />
-              {showVisualMap ? 'Hide' : 'Show'} Source Map
+              <TablerMap className="x:w-3 x:h-3" />
+              {showVisualMap ? 'Hide' : 'Show'} Map
             </Button>
           )}
 
           {settings.showContributionScore && contributionScores.length > 0 && (
             <div className="x:flex x:items-center x:gap-2">
-              <div className="x:flex x:items-center x:gap-1 x:text-gray-500">
-                <TablerInfoCircle className="x:w-4 x:h-4" />
+              <TooltipRoot>
                 <TooltipTrigger>
-                  <span className="x:text-xs">What is this?</span>
+                  <div className="x:flex x:items-center x:gap-1 x:text-gray-500 x:cursor-help">
+                    <TablerInfoCircle className="x:w-3 x:h-3" />
+                    <span className="x:text-xs">Sources</span>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent portal>
                   <p>Source contribution scores (% of content derived from each source)</p>
                 </TooltipContent>
-              </div>
+              </TooltipRoot>
               <div className="x:flex x:gap-1">
                 {contributionScores
                   .filter(score => score.percentage >= settings.contributionScoreThreshold)
@@ -192,11 +202,11 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
                     <Badge
                       key={score.sourceId}
                       variant="secondary"
-                      className="x:text-xs x:cursor-pointer"
+                      className="x:text-xs x:cursor-pointer x:px-1 x:py-0"
                       onMouseEnter={() => handleSourceHover(score.sourceId)}
                       onMouseLeave={() => handleSourceHover(null)}
                     >
-                      [{score.sourceId}] {score.percentage.toFixed(1)}%
+                      [{score.sourceId}] {score.percentage.toFixed(0)}%
                     </Badge>
                   ))
                 }
@@ -204,8 +214,8 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
             </div>
           )}
 
-          <div className="x:text-sm x:text-gray-600">
-            Found {sourceMappings.length} source mappings
+          <div className="x:text-xs x:text-gray-600">
+            {sourceMappings.length} mappings
           </div>
         </>
       )}

@@ -29,7 +29,6 @@ export default definePlugin({
     },
     dependencies: {
       corePlugins: ["domObservers:thread:messageBlocks"],
-      uiGroups: ["thread:header:actions"],
     },
   },
   settingsSchema: {
