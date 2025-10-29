@@ -10,7 +10,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "~/*": ["./*"]
-    }
+    },
+    "types": ["chrome"]
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*"]
