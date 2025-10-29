@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 import type { SourceForensicsSettings, SourceMapping, SourceContribution } from "../types";
 import { analyzeSourceMappings, calculateContributionScores } from "../utils/analyzer";
@@ -175,14 +175,15 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
 
           {settings.showContributionScore && contributionScores.length > 0 && (
             <div className="x:flex x:items-center x:gap-2">
-              <Tooltip>
+              <div className="x:flex x:items-center x:gap-1 x:text-gray-500">
+                <TablerInfoCircle className="x:w-4 x:h-4" />
                 <TooltipTrigger>
-                  <TablerInfoCircle className="x:w-4 x:h-4 x:text-gray-500" />
+                  <span className="x:text-xs">What is this?</span>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent portal>
                   <p>Source contribution scores (% of content derived from each source)</p>
                 </TooltipContent>
-              </Tooltip>
+              </div>
               <div className="x:flex x:gap-1">
                 {contributionScores
                   .filter(score => score.percentage >= settings.contributionScoreThreshold)
