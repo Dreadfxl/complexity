@@ -2,7 +2,6 @@ import { Slot } from "@radix-ui/react-slot";
 import { Command as CommandPrimitive } from "cmdk";
 import type { ComponentProps } from "react";
 import * as React from "react";
-import { useEffect } from "react";
 
 import type { DialogProps } from "@/components/ui/dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -106,7 +105,7 @@ export function CommandList({
     <CommandPrimitive.List
       className={cn(
         isInContentScript() ? PPLX_SCROLLBAR_CLASSES : "custom-scrollbar",
-        "x:max-h-[300px] x:overflow-x-hidden x:overflow-y-auto",
+        "x:max-h-[300px] x:scroll-pt-2 x:scroll-pb-2 x:overflow-x-hidden x:overflow-y-auto",
         className,
       )}
       {...props}
@@ -300,8 +299,9 @@ export function CommandItemSkeleton({
 }
 
 /**
- * Custom hook to handle manual scrolling for CommandList when using memoized CommandItems.
- * Use this when the default scroll behavior glitches.
+ * Custom hook to handle manual scrolling for CommandList when CommandItems are memoized
+ * Use this when the default scroll behavior glitches
+ * or use scroll-padding-block-start and scroll-padding-block-end to add padding to the top and bottom of the list
  */
 export function useCommandListManualScroll({
   enabled,
