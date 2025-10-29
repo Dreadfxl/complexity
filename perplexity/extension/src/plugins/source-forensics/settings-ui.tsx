@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import type { PluginId } from "@/__registries__/plugins/meta.types";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Image } from "@/components/ui/image";
 import useExtensionSettings from "@/services/infra/extension-api-wrappers/extension-settings/useExtensionSettings";
 
 export const pluginId: PluginId = "sourceForensics";
@@ -13,6 +12,26 @@ export const pluginId: PluginId = "sourceForensics";
 export default function SourceForensicsSettingsUi() {
   const { settings, mutation } = useExtensionSettings();
   const pluginSettings = settings?.plugins.sourceForensics;
+
+  const [localColor, setLocalColor] = useState(pluginSettings?.highlightColor ?? "#3b82f6");
+
+  useEffect(() => {
+    if (pluginSettings?.highlightColor) setLocalColor(pluginSettings.highlightColor);
+  }, [pluginSettings?.highlightColor]);
+
+  // Debounce save color
+  const debouncedSave = useMemo(() => {
+    let t: number | null = null;
+    return (value: string) => {
+      if (t) window.clearTimeout(t);
+      // @ts-expect-error setTimeout typing in DOM
+      t = window.setTimeout(() => {
+        mutation.mutate((draft) => {
+          draft.plugins.sourceForensics.highlightColor = value;
+        });
+      }, 200);
+    };
+  }, [mutation]);
 
   if (!settings) return null;
 
@@ -57,18 +76,19 @@ export default function SourceForensicsSettingsUi() {
             <Input
               id="highlight-color"
               type="color"
-              value={pluginSettings?.highlightColor ?? "#3b82f6"}
+              value={localColor}
               onChange={(e) => {
-                mutation.mutate((draft) => {
-                  draft.plugins.sourceForensics.highlightColor = e.target.value;
-                });
+                setLocalColor(e.target.value);
+                debouncedSave(e.target.value);
               }}
               className="x:w-20 x:h-10"
             />
           </div>
 
           <div className="x:space-y-2">
-            <Label>Contribution Score Threshold: {pluginSettings?.contributionScoreThreshold ?? 10}%</Label>
+            <Label>
+              Contribution Score Threshold: {pluginSettings?.contributionScoreThreshold ?? 10}%
+            </Label>
             <Slider
               value={[pluginSettings?.contributionScoreThreshold ?? 10]}
               onValueChange={([value]) => {
@@ -87,18 +107,6 @@ export default function SourceForensicsSettingsUi() {
           </div>
         </>
       )}
-
-      <div className="x:mx-auto x:w-full x:max-w-[700px] x:mt-6">
-        <div className="x:space-y-4">
-          <h3 className="x:text-lg x:font-semibold">How Source Forensics Works</h3>
-          <div className="x:space-y-2 x:text-sm x:text-gray-700">
-            <p><strong>Source-to-Text Highlighting:</strong> Hover over source citations to see which parts of the answer were derived from that source.</p>
-            <p><strong>Text-to-Source Navigation:</strong> Click on any sentence in the answer to highlight and scroll to the corresponding source.</p>
-            <p><strong>Contribution Analysis:</strong> View percentage scores showing how much each source contributed to the final answer.</p>
-            <p><strong>Visual Source Map:</strong> Get a bird's-eye view of how sources are distributed throughout the response.</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

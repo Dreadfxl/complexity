@@ -4,7 +4,7 @@ import { definePlugin } from "@/__registries__/plugins/utils";
 
 declare module "@/__registries__/plugins/meta.types" {
   interface PluginsSettingsRegistry {
-    "sourceForensics": z.infer<typeof schema>;
+    sourceForensics: z.infer<typeof schema>;
   }
 }
 
@@ -20,7 +20,8 @@ export default definePlugin({
   meta: {
     id: "sourceForensics",
     title: "Source Forensics",
-    description: "Interactive source-to-text mapping with visual highlighting and contribution analysis",
+    description:
+      "Interactive source-to-text mapping with visual highlighting and contribution analysis",
     dashboardMeta: {
       tags: ["ui", "analysis", "sources"],
       categories: ["thread", "productivity"],
@@ -28,7 +29,7 @@ export default definePlugin({
     },
     dependencies: {
       corePlugins: ["domObservers:thread:messageBlocks"],
-      uiGroups: ["thread:messageBlocks:footer"],
+      uiGroups: ["thread:header:actions"],
     },
   },
   settingsSchema: {
