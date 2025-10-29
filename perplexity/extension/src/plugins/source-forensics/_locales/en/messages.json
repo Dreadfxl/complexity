@@ -1,0 +1,32 @@
+{
+  "sourceForensics_title": {
+    "message": "Source Forensics"
+  },
+  "sourceForensics_description": {
+    "message": "Interactive source-to-text mapping with visual highlighting and contribution analysis"
+  },
+  "sourceForensics_enable": {
+    "message": "Enable Source Forensics"
+  },
+  "sourceForensics_disable": {
+    "message": "Disable Source Forensics"
+  },
+  "sourceForensics_showMap": {
+    "message": "Show Source Map"
+  },
+  "sourceForensics_hideMap": {
+    "message": "Hide Source Map"
+  },
+  "sourceForensics_contributionScores": {
+    "message": "Source contribution scores (% of content derived from each source)"
+  },
+  "sourceForensics_mappingsFound": {
+    "message": "Found $COUNT$ source mappings",
+    "placeholders": {
+      "COUNT": {
+        "content": "$1",
+        "example": "15"
+      }
+    }
+  }
+}
