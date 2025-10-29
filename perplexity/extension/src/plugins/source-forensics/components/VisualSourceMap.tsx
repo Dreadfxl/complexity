@@ -1,9 +1,10 @@
 import React from "react";
-import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import type { SourceMapping, SourceContribution } from "../types";
+
+import TablerX from "~icons/tabler/x";
 
 interface Props {
   mappings: SourceMapping[];
@@ -36,7 +37,7 @@ export function VisualSourceMap({ mappings, contributions, onSourceHover, highli
           onClick={() => setIsVisible(false)}
           className="x:p-1 x:h-6 x:w-6"
         >
-          <X className="x:w-4 x:h-4" />
+          <TablerX className="x:w-4 x:h-4" />
         </Button>
       </div>
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Eye, EyeOff, Map, Info } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import type { SourceForensicsSettings, SourceMapping, SourceContribution } from "../types";
 import { analyzeSourceMappings, calculateContributionScores } from "../utils/analyzer";
 import { VisualSourceMap } from "./VisualSourceMap";
+
+import TablerEye from "~icons/tabler/eye";
+import TablerEyeOff from "~icons/tabler/eye-off";
+import TablerMap from "~icons/tabler/map";
+import TablerInfoCircle from "~icons/tabler/info-circle";
 
 interface Props {
   settings: SourceForensicsSettings;
@@ -151,7 +155,7 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
         onClick={() => setIsActive(!isActive)}
         className={`x:gap-2 ${isActive ? 'x:bg-blue-100 x:border-blue-300' : ''}`}
       >
-        {isActive ? <EyeOff className="x:w-4 x:h-4" /> : <Eye className="x:w-4 x:h-4" />}
+        {isActive ? <TablerEyeOff className="x:w-4 x:h-4" /> : <TablerEye className="x:w-4 x:h-4" />}
         {isActive ? 'Disable' : 'Enable'} Source Forensics
       </Button>
 
@@ -164,7 +168,7 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
               onClick={() => setShowVisualMap(!showVisualMap)}
               className="x:gap-2"
             >
-              <Map className="x:w-4 x:h-4" />
+              <TablerMap className="x:w-4 x:h-4" />
               {showVisualMap ? 'Hide' : 'Show'} Source Map
             </Button>
           )}
@@ -173,7 +177,7 @@ export function SourceForensicsAnalyzer({ settings }: Props) {
             <div className="x:flex x:items-center x:gap-2">
               <Tooltip>
                 <TooltipTrigger>
-                  <Info className="x:w-4 x:h-4 x:text-gray-500" />
+                  <TablerInfoCircle className="x:w-4 x:h-4 x:text-gray-500" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Source contribution scores (% of content derived from each source)</p>
