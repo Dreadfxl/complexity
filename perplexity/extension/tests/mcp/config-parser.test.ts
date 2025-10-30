@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MCPConfigParser, ConfigSource } from "../src/services/mcp/config-parser";
-import { MCPServersConfigSchema } from "../src/services/mcp/types";
+import { MCPConfigParser, ConfigSource } from "@mcp/config-parser";
+import { MCPServersConfigSchema } from "@mcp/types";
 
 // Note: we mock chrome APIs for extension env
 // @ts-ignore

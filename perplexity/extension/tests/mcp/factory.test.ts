@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DefaultMCPClientFactory } from "../src/services/mcp/factory";
-import { HTTPMCPClient } from "../src/services/mcp/client";
+import { DefaultMCPClientFactory } from "@mcp/factory";
+import { HTTPMCPClient } from "@mcp/client";
 
 const factory = new DefaultMCPClientFactory();
 
