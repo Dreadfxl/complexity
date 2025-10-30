@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-// A very small mock HTTP server interface for MCP; in CI we assume localhost:8787 is running.
-// For local dev, run: npx mcp-superassistant --port 8787 (example) or use any MCP that replies to initialize/tools/list
-
-const MCP_URL = process.env.MCP_URL || 'http://127.0.0.1:8787/mcp';
+// Use explicit env override if provided, otherwise default to localhost:8787
+const DEFAULT_URL = 'http://127.0.0.1:8787/mcp';
+const MCP_URL = process.env.MCP_URL || DEFAULT_URL;
 
 async function call(method: string, params?: any) {
   const res = await fetch(MCP_URL, {
@@ -25,7 +24,6 @@ test('end-to-end MCP handshake and list tools', async () => {
   expect(init.error).toBeFalsy();
 
   const tools = await call('tools/list');
-  // Basic shape assertion
   expect(tools.error).toBeFalsy();
   expect(Array.isArray(tools.result?.tools ?? [])).toBeTruthy();
 });
