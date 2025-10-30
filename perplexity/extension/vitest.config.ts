@@ -15,6 +15,9 @@ export default defineConfig({
       'node_modules/**',
       '**/*.e2e.*',
     ],
+    setupFiles: [
+      path.resolve(__dirname, 'tests/setup.global.ts'),
+    ],
     deps: {
       inline: ['zod'],
     },
