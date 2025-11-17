@@ -18,10 +18,10 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "prettier": "catalog:lint",
-    "turbo": "^2.5.8",
+    "turbo": "^2.6.1",
     "typescript": "catalog:types"
   },
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": "^22.12.0"
   },

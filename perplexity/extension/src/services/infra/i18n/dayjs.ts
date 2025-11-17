@@ -36,6 +36,10 @@ export function formatRelativeTime(date: string) {
   return input.format("ll");
 }
 
+export function formatExactDate(date: string) {
+  return dayjs.utc(date).local().format("ll");
+}
+
 export async function initializeDayjsLocale() {
   const language = await getLanguage();
 
@@ -66,6 +70,6 @@ export async function initializeDayjsLocale() {
     "ru-RU": () => import("dayjs/locale/ru"),
   };
 
-  await importsMap[language as SupportedLangs]?.();
+  await importsMap[language as SupportedLangs]();
   dayjs.locale(dayjsLocaleImportNamesMap[language as SupportedLangs]);
 }

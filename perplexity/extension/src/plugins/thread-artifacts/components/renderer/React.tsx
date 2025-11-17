@@ -21,9 +21,9 @@ import {
   isAutonomousArtifactLanguageString,
 } from "@/plugins/thread-artifacts/utils";
 
-export default memo(function ReactRenderer() {
+export default function ReactRenderer() {
   const selectedCodeBlockLocation = useArtifactsStore(
-    (state) => state.selectedCodeBlockLocation,
+    (store) => store.selection.selectedCodeBlockLocation,
   );
 
   const selectedCodeBlock = useThreadCodeBlock({
@@ -58,7 +58,7 @@ export default memo(function ReactRenderer() {
       </SandpackProvider>
     </div>
   );
-});
+}
 
 function PreviewContainer({
   code,
@@ -85,8 +85,8 @@ function PreviewContainer({
       <SandpackLayout>
         <SandpackPreview
           ref={(previewRef) => {
-            artifactsStore.setState({
-              sandpackPreviewRef: previewRef,
+            artifactsStore.setState((draft) => {
+              draft.preview.sandpackPreviewRef = previewRef;
             });
           }}
           showRefreshButton={false}
@@ -100,7 +100,7 @@ function PreviewContainer({
 
 function FixErrorButtons() {
   const selectedCodeBlockLocation = useArtifactsStore(
-    (state) => state.selectedCodeBlockLocation,
+    (store) => store.selection.selectedCodeBlockLocation,
   );
 
   const selectedCodeBlock = useThreadCodeBlock({

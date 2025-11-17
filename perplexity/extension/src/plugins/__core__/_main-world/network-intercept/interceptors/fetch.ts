@@ -1,78 +1,50 @@
+import { createParser, type EventSourceMessage } from "eventsource-parser";
+
 import { NetworkInterceptMiddlewareManagerService } from "@/plugins/__core__/_main-world/network-intercept/_service/service-init.loader";
-import { errorWrapper } from "@/utils/wrappers/error-wrapper";
 
 export function initFetchInterceptor() {
   const originalFetch = window.fetch;
 
-  window.fetch = async function (input: RequestInfo | URL, init?: RequestInit) {
-    if (init?.body == null || typeof init.body !== "string") {
-      return originalFetch.call(window, input, init);
+  window.fetch = async function (
+    request: RequestInfo | URL,
+    init?: RequestInit,
+  ) {
+    if (init?.body != null && typeof init.body === "string") {
+      const [modifiedBody, error] = await tryCatch(() =>
+        NetworkInterceptMiddlewareManagerService.Proxy.executeMiddlewares({
+          data: {
+            type: "networkIntercept:fetchEvent",
+            event: "request",
+            payload: {
+              url: constructUrl(request),
+              data: init.body?.toString() ?? "",
+            },
+          },
+        }),
+      );
+
+      if (error) {
+        return originalFetch.call(window, request, init);
+      }
+
+      if (modifiedBody != null && modifiedBody.payload.data === "") {
+        return new Response("", { status: 200 });
+      }
+
+      init.body = modifiedBody?.payload.data ?? "";
     }
 
-    const [modifiedBody, error] = await errorWrapper(() =>
-      interceptRequest(input, init.body as string),
-    )();
-
-    if (error) {
-      return originalFetch.call(window, input, init);
-    }
-
-    if (modifiedBody === "") {
-      return new Response("", { status: 200 });
-    }
-
-    init.body = modifiedBody;
-
-    const response = await originalFetch.call(window, input, init);
-    const url = constructUrl(input);
+    const response = await originalFetch.call(window, request, init);
 
     if (response.headers.get("content-type")?.includes("text/event-stream")) {
-      return handleStreamingResponse(response, url);
+      return handleStreamingResponse(response);
     }
 
-    return handleRegularResponse(response, url);
+    return handleRegularResponse(response);
   };
 }
 
-async function interceptRequest(input: RequestInfo | URL, body: string) {
-  const resp =
-    await NetworkInterceptMiddlewareManagerService.Proxy.executeMiddlewares({
-      data: {
-        type: "networkIntercept:fetchEvent",
-        event: "request",
-        payload: { url: constructUrl(input), data: body },
-      },
-    });
-
-  return resp.payload.data;
-}
-
-function parseSSEChunk(chunk: string): { event: string; data: string }[] {
-  const events: { event: string; data: string }[] = [];
-  const eventStrings = chunk.split("\n\n").filter(Boolean);
-
-  for (const eventString of eventStrings) {
-    const lines = eventString.split("\n");
-    let event = "message";
-    let data = "";
-
-    for (const line of lines) {
-      if (line.startsWith("event:")) {
-        event = line.slice(6).trim();
-      } else if (line.startsWith("data:")) {
-        data = line.slice(5).trim();
-      }
-    }
-
-    if (data) {
-      events.push({ event, data });
-    }
-  }
-
-  return events;
-}
-
-function handleStreamingResponse(response: Response, url: string) {
+function handleStreamingResponse(response: Response) {
   const reader = response.body?.getReader();
   if (!reader) return response;
 
@@ -81,16 +53,29 @@ function handleStreamingResponse(response: Response, url: string) {
   return new Response(
     new ReadableStream({
       async start(controller) {
+        const parser = createParser({
+          onEvent(event: EventSourceMessage) {
+            void NetworkInterceptMiddlewareManagerService.Proxy.executeMiddlewares(
+              {
+                data: {
+                  type: "networkIntercept:fetchEvent",
+                  event: "response",
+                  payload: {
+                    url: constructUrl(response.url),
+                    status: response.status,
+                    data: event.data,
+                  },
+                },
+              },
+            );
+          },
+        });
+
         try {
           let result = await reader.read();
           while (!result.done) {
             const chunk = decoder.decode(result.value, { stream: true });
-            const events = parseSSEChunk(chunk);
-
-            for (const event of events) {
-              await log(url, response.status, event.data);
-            }
-
+            parser.feed(chunk);
             controller.enqueue(result.value);
             result = await reader.read();
           }
@@ -109,25 +94,25 @@ function handleStreamingResponse(response: Response, url: string) {
   );
 }
 
-async function handleRegularResponse(response: Response, url: string) {
+async function handleRegularResponse(response: Response) {
   const clonedResponse = response.clone();
   const body = await clonedResponse.text();
-  await log(url, response.status, body);
-  return response;
-}
-
-async function log(url: string, status: number, data: string) {
   void NetworkInterceptMiddlewareManagerService.Proxy.noop({
     data: {
       type: "networkIntercept:fetchEvent",
       event: "response",
-      payload: { url, status, data },
+      payload: {
+        url: constructUrl(response.url),
+        status: response.status,
+        data: body,
+      },
     },
   });
+  return response;
 }
 
 function constructUrl(url: unknown) {
   if (url instanceof URL) return url.href;
-  if (typeof url === "string") return url;
+  if (typeof url === "string") return new URL(url, window.location.origin).href;
   return "";
 }

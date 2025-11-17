@@ -1,10 +1,11 @@
 import Cplx from "@/components/icons/Cplx";
-import FaArrowUpRight from "@/components/icons/FaArrowUpRight";
 import { Portal } from "@/components/ui/portal";
 import { useIsMobileStore } from "@/hooks/is-mobile-store";
 import { useSettingsPageDomObserverStore } from "@/plugins/__core__/dom-observers/settings-page/store";
 import { DomSelectorsService } from "@/plugins/__core__/dom-selectors/service-init.loader";
 import { ContentScriptBgUtilsService } from "@/services/features/content-script-utils/service-init.bg-worker";
+
+import TablerArrowUpRight from "~icons/tabler/arrow-up-right";
 
 export function SettingsDashboardLink() {
   const isMobile = useIsMobileStore((store) => store.isMobile);
@@ -14,36 +15,32 @@ export function SettingsDashboardLink() {
     isMobile ? undefined : deepEqual,
   );
 
-  const portalContainer = (() => {
-    if (!sidebarWrapper) return null;
+  if (!sidebarWrapper) return null;
 
-    const $sidebarWrapper = $(sidebarWrapper);
+  const $sidebarWrapper = $(sidebarWrapper);
 
-    if (!$sidebarWrapper.length) return null;
+  if (!$sidebarWrapper.length) return null;
 
-    const $existingContainer = $(sidebarWrapper).find(
-      DomSelectorsService.Root.cplxAttribute(
-        DomSelectorsService.Root.internalAttributes.SETTINGS_PAGE
-          .CPLX_DASHBOARD_LINK,
-      ),
-    );
+  const $existingContainer = $sidebarWrapper.find(
+    DomSelectorsService.Root.cplxAttribute(
+      DomSelectorsService.Root.internalAttributes.SETTINGS_PAGE
+        .CPLX_DASHBOARD_LINK,
+    ),
+  );
 
-    if ($existingContainer[0]) return $existingContainer[0];
-
-    const $portalContainer = $("<div>")
+  const portalContainer =
+    $existingContainer[0] ??
+    $("<div>")
       .internalComponentAttr(
         DomSelectorsService.Root.internalAttributes.SETTINGS_PAGE
           .CPLX_DASHBOARD_LINK,
       )
       .insertAfter(
-        $(sidebarWrapper).find(
+        $sidebarWrapper.find(
           DomSelectorsService.Root.cachedSync.SETTINGS_PAGE.SIDEBAR_CHILD
             .BACK_BUTTON,
         ),
-      );
-
-    return $portalContainer[0];
-  })();
+      )[0];
 
   if (portalContainer == null) return null;
 
@@ -59,7 +56,7 @@ export function SettingsDashboardLink() {
           <Cplx className="x:size-4 x:fill-foreground" />
           <div>Complexity</div>
         </div>
-        <FaArrowUpRight className="x:ml-auto x:size-3.5 x:text-muted-foreground" />
+        <TablerArrowUpRight className="x:ml-auto x:size-4 x:text-muted-foreground" />
       </div>
     </Portal>
   );

@@ -6,13 +6,12 @@ import TablerCpu from "~icons/tabler/cpu";
 
 export default function CometAssistantLanguageModelSelectorTriggerButton() {
   const selectedLanguageModel = useBetterLanguageModelSelectorStore(
-    (state) => state.model,
+    (store) => store.model,
   );
 
-  const modelInfo = (() =>
-    Object.values(PplxLanguageModelsService.allModels)
-      .flat()
-      .find((m) => m.code === selectedLanguageModel))();
+  const modelInfo = Object.values(PplxLanguageModelsService.allModels)
+    .flat()
+    .find((m) => m.code === selectedLanguageModel);
 
   const isAuto = modelInfo?.label.toLowerCase().includes("auto");
 

@@ -14,10 +14,10 @@ export default function SpaceThreadCommandItems({
 }: {
   spaceSlug: Space["slug"];
 }) {
-  useCommandMenuStore((store) => store.open);
+  useCommandMenuStore((store) => store.states.open);
 
   const searchValue = useDebounce(
-    useCommandMenuStore((store) => store.searchValue),
+    useCommandMenuStore((store) => store.states.searchValue),
     300,
   );
 
@@ -57,7 +57,9 @@ export default function SpaceThreadCommandItems({
           {isFetchingNextPage && (
             <CommandItemSkeleton count={3} className="x:h-14" />
           )}
-          {hasNextPage && <div ref={triggerRef} className="x:h-30" />}
+          {hasNextPage && !isFetchingNextPage && (
+            <div ref={triggerRef} className="x:h-30" />
+          )}
         </>
       )}
 

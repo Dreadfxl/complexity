@@ -27,7 +27,7 @@ export function createTextboxAdapter(
 
   const getTextLength = () => {
     return isLexical(element)
-      ? (element.innerText?.replace(/^\n\s/, "").length ?? 0)
+      ? element.innerText.replace(/^\n\s/, "").length
       : (element as HTMLTextAreaElement).value.length;
   };
 
@@ -36,7 +36,8 @@ export function createTextboxAdapter(
       lexicalUtils.insertText(
         element,
         text,
-        slashCommandMenuStore.getState().bufferTextCaretPosition ?? undefined,
+        slashCommandMenuStore.getState().anchor.bufferTextCaretPosition ??
+          undefined,
       );
     } else {
       textareaUtils.insertText(element as HTMLTextAreaElement, text);

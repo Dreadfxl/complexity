@@ -1,9 +1,9 @@
-import { produce } from "immer";
 import merge from "lodash/merge";
-import type { DeepPartial } from "react-hook-form";
+import { create } from "mutative";
 
 import type { BetterCodeBlockFineGrainedOptions } from "@/plugins/thread-better-code-blocks/types";
 import { db } from "@/services/infra/indexed-db";
+import type { DeepPartial } from "@/types/utils.types";
 
 export const backgroundProxyServiceName = "betterCodeBlocksFineGrainedService";
 
@@ -44,7 +44,7 @@ export class BetterCodeBlocksFineGrainedServiceImpl {
       throw new Error("Language not found");
     }
 
-    const newSettings: BetterCodeBlockFineGrainedOptions = produce(
+    const newSettings: BetterCodeBlockFineGrainedOptions = create(
       currentSettings,
       (draft) => {
         return merge(draft, newDraft);

@@ -9,12 +9,11 @@ import { PluginCardHeader } from "@/entrypoints/options-page/dashboard/pages/plu
 import { PluginCardTags } from "@/entrypoints/options-page/dashboard/pages/plugins/components/plugin-card/PluginCardTags";
 import { PluginLockDownOverlay } from "@/entrypoints/options-page/dashboard/pages/plugins/components/plugin-card/PluginLockDownOverlay";
 import PluginCardSkeleton from "@/entrypoints/options-page/dashboard/pages/plugins/components/PluginCardSkeleton";
-import useExtensionSettings from "@/services/infra/extension-api-wrappers/extension-settings/useExtensionSettings";
 type PluginCardProps = {
   pluginId: PluginId;
 };
 
-const PluginCardContent = memo(() => {
+function PluginCardContent() {
   const {
     state: {
       isLoading,
@@ -25,13 +24,9 @@ const PluginCardContent = memo(() => {
     },
   } = usePluginCardContext();
 
-  const { settings } = useExtensionSettings();
-
   if (isLoading) {
     return <PluginCardSkeleton />;
   }
-
-  if (!settings) return null;
 
   return (
     <div className="x:relative">
@@ -52,14 +47,12 @@ const PluginCardContent = memo(() => {
       )}
     </div>
   );
-});
+}
 
-const PluginCard = memo(({ pluginId }: PluginCardProps) => {
+export default function PluginCard({ pluginId }: PluginCardProps) {
   return (
     <PluginCardProvider pluginId={pluginId}>
       <PluginCardContent />
     </PluginCardProvider>
   );
-});
-
-export default PluginCard;
+}

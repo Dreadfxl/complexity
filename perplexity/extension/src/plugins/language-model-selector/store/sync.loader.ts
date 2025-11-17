@@ -47,7 +47,7 @@ function getModelType(modelCode: LanguageModelCode): LanguageModelType {
 
 function initializeFromCookie(): void {
   const lastSelectedLanguageModel = localStorage.getItem(
-    "cplx.last-selected-language-model",
+    "cplx:lastSelectedLanguageModel",
   );
 
   if (
@@ -69,7 +69,7 @@ function initializeFromCookie(): void {
 
 function syncFromInternalSearchStates(): void {
   internalSearchStatesObserverStore.subscribe(
-    (state) => state.model,
+    (store) => store.model,
     (model) => {
       if (model == null || !isLanguageModelCode(model)) {
         return;
@@ -82,9 +82,9 @@ function syncFromInternalSearchStates(): void {
 
 function syncToInternalSearchStates(): void {
   betterLanguageModelSelectorStore.subscribe(
-    (state) => state.model,
+    (store) => store.model,
     (model) => {
-      if (model == null || !isLanguageModelCode(model)) {
+      if (!isLanguageModelCode(model)) {
         return;
       }
 

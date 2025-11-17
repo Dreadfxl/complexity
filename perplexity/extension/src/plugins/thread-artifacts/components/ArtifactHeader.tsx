@@ -23,7 +23,7 @@ import TablerX from "~icons/tabler/x";
 
 export default function ArtifactHeader() {
   const selectedCodeBlockLocation = useArtifactsStore(
-    (state) => state.selectedCodeBlockLocation,
+    (store) => store.selection.selectedCodeBlockLocation,
   );
 
   const selectedCodeBlock = useThreadCodeBlock({
@@ -41,7 +41,7 @@ export default function ArtifactHeader() {
     selectedCodeBlock?.content.language,
   );
   const isInFlight = selectedCodeBlock?.states.isInFlight;
-  const artifactViewMode = useArtifactsStore((state) => state.state);
+  const artifactViewMode = useArtifactsStore((store) => store.states.view);
   const language = getInterpretedArtifactLanguage(
     selectedCodeBlock?.content.language ?? "text",
   ) as ArtifactLanguage;
@@ -49,12 +49,12 @@ export default function ArtifactHeader() {
   if (!isArtifactLanguage && !isAutonomousArtifactLanguage) return null;
 
   return (
-    <div className="x:flex x:w-full x:items-center x:justify-between x:border-b x:border-border/50 x:bg-background x:p-2 x:px-4">
+    <div className="x:sticky x:top-0 x:z-10 x:flex x:w-full x:items-center x:justify-between x:border-b x:border-border/50 x:bg-background x:p-2 x:px-4">
       <div
         className="x:line-clamp-1 x:cursor-pointer x:text-muted-foreground"
         onClick={() => {
           const selectedCodeBlockLocation =
-            artifactsStore.getState().selectedCodeBlockLocation;
+            artifactsStore.getState().selection.selectedCodeBlockLocation;
           if (!selectedCodeBlockLocation) return;
 
           const selector = `${DomSelectorsService.Root.cplxAttribute(
@@ -81,7 +81,7 @@ export default function ArtifactHeader() {
                 variant="ghost"
                 size="iconSm"
                 className="x:animate-in x:fade-in"
-                onClick={() => artifactsStore.getState().refreshPreview()}
+                onClick={() => artifactsStore.getState().preview.refresh()}
               >
                 <TablerRefresh className="x:size-4" />
               </Button>
@@ -90,26 +90,24 @@ export default function ArtifactHeader() {
           {isAutonomousArtifactLanguage && (
             <>
               <PreviewToggle language={language} />
-              {isAutonomousArtifactLanguage && (
-                <Tooltip content={t("plugin-artifacts.tooltip.openList")}>
-                  <Button
-                    variant="ghost"
-                    size="iconSm"
-                    onClick={() =>
-                      artifactsStore.getState().openArtifactsList()
-                    }
-                  >
-                    <TablerList className="x:size-4" />
-                  </Button>
-                </Tooltip>
-              )}
+              <Tooltip content={t("plugin-artifacts.tooltip.openList")}>
+                <Button
+                  variant="ghost"
+                  size="iconSm"
+                  onClick={() =>
+                    artifactsStore.getState().ui.openArtifactsList()
+                  }
+                >
+                  <TablerList className="x:size-4" />
+                </Button>
+              </Tooltip>
             </>
           )}
         </div>
         <Button
           variant="ghost"
           size="iconSm"
-          onClick={() => artifactsStore.getState().close()}
+          onClick={() => artifactsStore.getState().selection.close()}
         >
           <TablerX className="x:size-4" />
         </Button>

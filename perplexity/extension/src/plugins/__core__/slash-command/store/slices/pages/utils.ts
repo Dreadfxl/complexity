@@ -12,11 +12,13 @@ export function getMatchedPageCommand({
   const command = match[1];
   if (!command) return null;
 
+  // TODO: Implement command registry
+
   const promptHistoryShortcut =
-    ExtensionSettingsService.cachedSync.plugins["promptHistory"]?.shortcut;
+    ExtensionSettingsService.cachedSync.plugins["promptHistory"].shortcut;
 
   if (
-    promptHistoryShortcut?.type === "command" &&
+    promptHistoryShortcut.type === "command" &&
     promptHistoryShortcut.value === command
   ) {
     return "promptHistory";

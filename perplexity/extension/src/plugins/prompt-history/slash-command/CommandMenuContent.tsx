@@ -9,7 +9,6 @@ import {
   CommandGroup,
   CommandInput,
   CommandList,
-  useCommandListManualScroll,
 } from "@/components/ui/command";
 import { CommandItemSkeleton } from "@/components/ui/command";
 import { getPlatform } from "@/hooks/usePlatformDetection";
@@ -26,6 +25,7 @@ export function PromptHistoryCommandMenuContent() {
 
   const [searchValue, setSearchValue] = useState("");
   const [selectingValue, setSelectingValue] = useState("");
+
   const debouncedSearchValue = useDebounce(searchValue, 200);
   const {
     items,
@@ -41,14 +41,6 @@ export function PromptHistoryCommandMenuContent() {
     enabled: true,
   });
 
-  const commandListRef = useRef<HTMLDivElement | null>(null);
-
-  useCommandListManualScroll({
-    enabled: true,
-    commandListRef,
-    willUpdateValue: selectingValue,
-  });
-
   const { triggerRef } = useLoadMoreItems({
     hasNextPage,
     isFetching,
@@ -57,6 +49,21 @@ export function PromptHistoryCommandMenuContent() {
 
   const deleteItem = async (id: string) => {
     await PromptHistoryService.Instance.delete(id);
+
+    if (items != null) {
+      const currentIndex = items.findIndex((item) => item.id === id);
+
+      if (currentIndex !== -1 && items.length > 1) {
+        const nextIndex =
+          currentIndex < items.length - 1 ? currentIndex + 1 : currentIndex - 1;
+        const nextItem = items[nextIndex];
+        if (nextItem != null) {
+          setSelectingValue(nextItem.id);
+        }
+      } else {
+        setSelectingValue("");
+      }
+    }
 
     void queryClient.invalidateQueries({
       queryKey: promptHistoryQueries.infinite.all(),
@@ -103,13 +110,14 @@ export function PromptHistoryCommandMenuContent() {
     | `top-${string}`
     | undefined;
 
-  if (items == null) return null;
-
   return (
     <Command
-      className={cn("x:flex x:bg-background x:dark:bg-secondary", {
-        "x:flex-col-reverse": placement?.startsWith("top"),
-      })}
+      className={cn(
+        "x:flex x:rounded-none x:bg-background x:dark:bg-secondary",
+        {
+          "x:flex-col-reverse": placement?.startsWith("top"),
+        },
+      )}
       value={selectingValue}
       onValueChange={setSelectingValue}
     >
@@ -123,13 +131,9 @@ export function PromptHistoryCommandMenuContent() {
         value={searchValue}
         onValueChange={setSearchValue}
       />
-      <CommandList
-        ref={commandListRef}
-        data-prompt-history-command-list
-        className="x:h-[200px]"
-      >
+      <CommandList className="x:h-[200px] x:scroll-pt-10 x:scroll-pb-10">
         <CommandGroup>
-          {items.map((item) => (
+          {items?.map((item) => (
             <PromptHistoryCommandMenuItem
               key={item.id}
               searchValue={searchValue}
@@ -137,16 +141,16 @@ export function PromptHistoryCommandMenuContent() {
               onDelete={deleteItem}
             />
           ))}
+          {(isLoading || isFetchingNextPage) && (
+            <CommandItemSkeleton count={3} className="x:h-5" />
+          )}
         </CommandGroup>
         {!isLoading && (
           <CommandEmpty className="x:flex x:w-full x:items-center x:justify-center">
             {t("plugin-prompt-history.search.noResults")}
           </CommandEmpty>
         )}
-        {(isLoading || isFetchingNextPage) && (
-          <CommandItemSkeleton count={3} className="x:h-5" />
-        )}
-        {hasNextPage && <div ref={triggerRef} className="x:h-10" />}
+        {hasNextPage && <div ref={triggerRef} className="x:h-30" />}
       </CommandList>
     </Command>
   );

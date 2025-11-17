@@ -1,4 +1,5 @@
 import { toast } from "@/components/ui/use-toast";
+import { getPlatform } from "@/hooks/usePlatformDetection";
 import {
   openInNewTab,
   softNavigate,
@@ -12,7 +13,9 @@ import {
 export default function SpacesSearchItemsFooter() {
   const { data: spaces } = usePplxSpaces();
 
-  const selectingValue = useCommandMenuStore((store) => store.selectingValue);
+  const selectingValue = useCommandMenuStore(
+    (store) => store.states.selectingValue,
+  );
 
   useEffect(() => {
     if (!selectingValue) return;
@@ -22,10 +25,10 @@ export default function SpacesSearchItemsFooter() {
     if (!space) return;
 
     // TODO: bind keys to actions, prevent duplication in the Item itself
-    commandMenuStore.getState().setFooterItems([
+    commandMenuStore.getState().footer.setItems([
       {
         title: t("plugin-command-menu.spaces.footer.copyId"),
-        keybinding: [Key.Control, "c"],
+        keybinding: [getPlatform() === "mac" ? Key.Meta : Key.Control, "c"],
         onSelect: async () => {
           await navigator.clipboard.writeText(space.uuid);
 
@@ -39,15 +42,15 @@ export default function SpacesSearchItemsFooter() {
         title: t("plugin-command-menu.spaces.footer.openInNewTab"),
         keybinding: [Key.Alt, Key.Enter],
         onSelect: () => {
-          void openInNewTab(`/spaces/${space?.slug}`);
-          commandMenuStore.getState().setOpen(false);
+          void openInNewTab(`/spaces/${space.slug}`);
+          commandMenuStore.getState().states.setOpen(false);
         },
       },
       {
         title: t("plugin-command-menu.spaces.footer.searchInSpace"),
         keybinding: [Key.Shift, Key.Enter],
         onSelect: () => {
-          commandMenuStore.getState().pushPage({
+          commandMenuStore.getState().pagesStack.push({
             pageId: "spaceThreads",
             args: {
               spaceSlug: space.slug,
@@ -65,14 +68,14 @@ export default function SpacesSearchItemsFooter() {
         title: t("plugin-command-menu.spaces.footer.goToSpace"),
         keybinding: [Key.Enter],
         onSelect: () => {
-          void softNavigate(`/spaces/${space?.slug}`);
-          commandMenuStore.getState().setOpen(false);
+          void softNavigate(`/spaces/${space.slug}`);
+          commandMenuStore.getState().states.setOpen(false);
         },
       },
     ]);
 
     return () => {
-      commandMenuStore.getState().setFooterItems([]);
+      commandMenuStore.getState().footer.setItems([]);
     };
   }, [selectingValue, spaces]);
 

@@ -1,3 +1,4 @@
+import { APP_CONFIG } from "@/app.config";
 import type {
   Middleware,
   MiddlewareNameBasedPriority,
@@ -7,7 +8,8 @@ import type { MiddlewareData } from "@/plugins/__core__/_main-world/network-inte
 export const csProxyServiceName = "networkInterceptService";
 
 export class NetworkInterceptMiddlewareManagerImpl {
-  private static instance: NetworkInterceptMiddlewareManagerImpl;
+  private static instance: NetworkInterceptMiddlewareManagerImpl =
+    new NetworkInterceptMiddlewareManagerImpl();
   private middlewares: Middleware[] = [];
 
   overridesReady = false;
@@ -15,10 +17,6 @@ export class NetworkInterceptMiddlewareManagerImpl {
   private constructor() {}
 
   static getInstance(): NetworkInterceptMiddlewareManagerImpl {
-    if (NetworkInterceptMiddlewareManagerImpl.instance == null) {
-      NetworkInterceptMiddlewareManagerImpl.instance =
-        new NetworkInterceptMiddlewareManagerImpl();
-    }
     return NetworkInterceptMiddlewareManagerImpl.instance;
   }
 
@@ -82,7 +80,7 @@ export class NetworkInterceptMiddlewareManagerImpl {
     data,
   }: {
     data: T;
-  }): Promise<T> {
+  }): Promise<T | null> {
     let currentData = { ...data };
 
     for (const middleware of this.middlewares) {
@@ -136,6 +134,8 @@ export class NetworkInterceptMiddlewareManagerImpl {
   }
 
   async noop({ data }: { data: MiddlewareData }) {
+    if (!APP_CONFIG.IS_DEV) return;
+
     switch (data.type) {
       case "networkIntercept:webSocketEvent":
         // console.log("%cwebSocketEvent", "color: blue", {

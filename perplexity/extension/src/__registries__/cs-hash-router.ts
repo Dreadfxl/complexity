@@ -10,9 +10,5 @@ export const hashRouterObservers: RouteObject[] = (() => {
         default: RouteObject;
       }
     >,
-  ).map((module) => {
-    invariant(module.default != null, "[HashRouter] Invalid context");
-
-    return module.default;
-  });
+  ).map((module) => module.default);
 })();

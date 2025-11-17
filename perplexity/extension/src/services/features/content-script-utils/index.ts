@@ -11,11 +11,7 @@ export class ContentScriptBgUtilsServiceImpl {
   }) {
     const windowId = (await chrome.tabs.get(currentTabId)).windowId;
 
-    if (windowId == null) return;
-
     const window = await chrome.windows.get(windowId);
-
-    if (window == null) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (window as any).sidecarTabId as number | undefined;
@@ -25,11 +21,19 @@ export class ContentScriptBgUtilsServiceImpl {
     void chrome.runtime.openOptionsPage();
   }
 
-  static async openDirectReleaseNotes({ version }: { version: string }) {
-    const optionsPageUrl = getOptionsPageUrl({ isDev: APP_CONFIG.IS_DEV });
+  static async openExtensionsManagementPage() {
+    if (APP_CONFIG.BROWSER === "chrome") {
+      void chrome.tabs.create({
+        url: `chrome://extensions?id=${chrome.runtime.id}`,
+      });
+    } else {
+      // noop, Firefox doesnt allow opening about:* pages
+    }
+  }
 
+  static async openFullScreenReleaseNotes({ version }: { version: string }) {
     void chrome.tabs.create({
-      url: `${optionsPageUrl}#/direct-release-notes?version=${version}`,
+      url: `${getOptionsPageUrl({ isDev: APP_CONFIG.IS_DEV })}#/fs-release-notes?version=${version}`,
     });
   }
 

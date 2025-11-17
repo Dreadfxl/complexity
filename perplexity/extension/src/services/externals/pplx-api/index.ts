@@ -16,6 +16,7 @@ import type {
   PplxAiProfileApiResponse,
   PplxAuthSessionApiResponse,
   PplxOrgSettingsApiResponse,
+  ThreadApiResponse,
 } from "@/services/externals/pplx-api/pplx-api.types";
 import {
   PplxAiProfileApiResponseSchema,
@@ -145,18 +146,49 @@ export class PplxApiService {
   ): Promise<ThreadMessageApiResponse[]> {
     if (!threadSlug) throw new Error("Thread slug is required");
 
-    const url = ENDPOINTS.RESOURCES.THREADS.GET_ONE(threadSlug);
+    const allEntries: ThreadMessageApiResponse[] = [];
+    let hasNextPage = true;
+    let cursor: string | undefined;
 
-    const resp = await fetchTextResource(url);
+    while (hasNextPage) {
+      const url = ENDPOINTS.RESOURCES.THREADS.GET_ONE({
+        slug: threadSlug,
+        cursor,
+      });
 
-    const data = jsonUtils.safeParse(resp);
+      const resp = await fetchTextResource(url);
 
-    if (data == null) throw new Error("Failed to fetch thread info");
+      const data = jsonUtils.safeParse(resp) as ThreadApiResponse | null;
 
-    if (data.entries == null || data.entries?.length <= 0)
-      throw new Error("Thread not found");
+      if (data == null) throw new Error("Failed to fetch thread info");
 
-    return z.array(ThreadMessageApiResponseSchema).parse(data.entries);
+      if (data.entries.length === 0) {
+        if (allEntries.length === 0) {
+          throw new Error("Thread not found");
+        }
+        break;
+      }
+
+      const parsedEntries = z
+        .array(ThreadMessageApiResponseSchema)
+        .parse(data.entries);
+
+      allEntries.push(...parsedEntries);
+
+      hasNextPage = data.has_next_page;
+      cursor = data.next_cursor ?? undefined;
+
+      if (hasNextPage) {
+        await sleep(200);
+      }
+
+      console.log(
+        "fetching paginated thread, total entries fetched so far:",
+        allEntries.length,
+      );
+    }
+
+    return allEntries;
   }
 
   static async fetchThreads({
@@ -177,7 +209,7 @@ export class PplxApiService {
         ascending,
         thread_type_filter: threadTypeFilter,
         query_source_filter: querySourceFilter,
-        with_temporary_threads: withTemporaryThreads,
+        with_temporary_threads: withTemporaryThreads ? undefined : false,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -234,25 +266,20 @@ export class PplxApiService {
   }
 
   static async fetchSpaceFileDownloadUrl({
-    fileUuid,
-    spaceUuid,
+    fileS3Url,
   }: {
-    fileUuid: string;
-    spaceUuid: string;
+    fileS3Url: string;
   }): Promise<SpaceFileDownloadUrlApiResponse> {
     // POST https://www.perplexity.ai/rest/file-repository/download-file?version=2.13&source=default
     // payload: {"file_uuid":"a1baad94-9a0a-4c84-925e-b8d41960f428","file_repository_info":{"file_repository_type":"COLLECTION","owner_id":"cf11f61d-4f74-4582-9f2c-365f5419989b"}}
 
     const resp = await fetch(
-      "https://www.perplexity.ai/rest/file-repository/download-file?version=2.13&source=default",
+      "https://www.perplexity.ai/rest/file-repository/download?version=2.18&source=default",
       {
         method: "POST",
         body: JSON.stringify({
-          file_uuid: fileUuid,
-          file_repository_info: {
-            file_repository_type: "COLLECTION",
-            owner_id: spaceUuid,
-          },
+          file_url: fileS3Url,
+          view_mode: false,
         }),
         headers: {
           "Content-Type": "application/json",

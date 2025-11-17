@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useInsertCss } from "@/hooks/useInsertCss";
-import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-cache";
+import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-client";
 import { getActiveQueryBox } from "@/plugins/__ui-groups__/elements/query-box/utils";
 import { normalizeCssResourceConfig } from "@/plugins/force-writing-mode/index.remote-resources";
 import { useForceWritingModeStore } from "@/plugins/force-writing-mode/store";
@@ -28,8 +28,8 @@ const normalizeCss = await getVersionedRemoteResource(
 
 export function ForceWritingModeToggle() {
   const [isOpen, setIsOpen] = useState(false);
-  const [warningShown, setWarningShown] = useLocalStorage(
-    "cplx.spacesThreadsForceWritingMode.warningShown",
+  const [showWarning, setShowWarning] = useLocalStorage(
+    "cplx.plugin:queryBox:spacesThreadsForceWritingMode:showWarning",
     true,
   );
 
@@ -59,7 +59,7 @@ export function ForceWritingModeToggle() {
 
   return (
     <Dialog
-      open={warningShown ? isOpen : false}
+      open={showWarning ? isOpen : false}
       onOpenChange={({ open }) => {
         if (!forceWritingMode) return;
 
@@ -92,8 +92,8 @@ export function ForceWritingModeToggle() {
         </DialogDescription>
         <DialogFooter>
           <DialogClose asChild>
-            <Button onClick={() => setWarningShown(false)}>
-              I understand, don't show again
+            <Button onClick={() => setShowWarning(false)}>
+              I understand, don&apos;t show again
             </Button>
           </DialogClose>
           <DialogClose asChild>

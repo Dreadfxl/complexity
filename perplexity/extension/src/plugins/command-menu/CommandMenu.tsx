@@ -1,21 +1,16 @@
 import { useHotkeys } from "react-hotkeys-hook";
 
-import {
-  Command,
-  CommandDialog,
-  CommandList,
-  useCommandListManualScroll,
-} from "@/components/ui/command";
+import { Command, CommandDialog, CommandList } from "@/components/ui/command";
 import CommandFooter from "@/plugins/command-menu/components/CommandFooter";
 import CommandInput from "@/plugins/command-menu/components/CommandInput";
 import CommandSidecar from "@/plugins/command-menu/components/CommandSidecar";
+import { ExternalPages } from "@/plugins/command-menu/pages/ExternalPages";
 import IndexPage from "@/plugins/command-menu/pages/IndexPage";
 import SpaceThreadsPage from "@/plugins/command-menu/pages/space-threads/Page";
 import SpacesPage from "@/plugins/command-menu/pages/spaces/Page";
 import ThreadsPage from "@/plugins/command-menu/pages/threads/Page";
 import { useCommandMenuStore } from "@/plugins/command-menu/store";
 import { ExtensionSettingsService } from "@/services/infra/extension-api-wrappers/extension-settings";
-import { PPLX_SCROLLBAR_CLASSES } from "@/utils/dom-utils/pplx-scrollbar-classes";
 import { keysToString } from "@/utils/misc/utils";
 
 export function CommandMenu() {
@@ -25,19 +20,13 @@ export function CommandMenu() {
     shouldLocalFilter,
     open,
     setOpen,
-    sidecarOpen,
-    setSidecarOpen,
-  } = useCommandMenuStore();
+  } = useCommandMenuStore((store) => store.states);
 
-  const commandListRef = useRef<HTMLDivElement>(null);
+  const { open: sidecarOpen, setOpen: setSidecarOpen } = useCommandMenuStore(
+    (store) => store.sidecar,
+  );
 
   const settings = ExtensionSettingsService.cachedSync.plugins.commandMenu;
-
-  useCommandListManualScroll({
-    enabled: open,
-    commandListRef,
-    willUpdateValue: selectingValue,
-  });
 
   useHotkeys(
     keysToString(settings.keybindings.toggle),
@@ -93,13 +82,15 @@ export function CommandMenu() {
             )}
           >
             <CommandList
-              ref={commandListRef}
-              data-command-menu-list
-              className={cn("x:min-h-[400px]", {
-                "x:h-[500px] x:max-h-[500px]": sidecarOpen,
-              })}
+              className={cn(
+                "x:max-h-[700px] x:min-h-[400px] x:scroll-pt-32 x:scroll-pb-26",
+                {
+                  "x:h-[500px] x:max-h-[500px]": sidecarOpen,
+                },
+              )}
             >
               <IndexPage />
+              <ExternalPages />
               <SpacesPage />
               <ThreadsPage />
               <SpaceThreadsPage />
@@ -108,7 +99,7 @@ export function CommandMenu() {
           {sidecarOpen && (
             <div
               className={cn(
-                PPLX_SCROLLBAR_CLASSES,
+                "custom-scrollbar",
                 "x:h-[500px] x:max-h-[500px] x:overflow-y-auto",
               )}
             >

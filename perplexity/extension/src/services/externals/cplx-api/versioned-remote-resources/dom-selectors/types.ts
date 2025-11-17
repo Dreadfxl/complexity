@@ -1,18 +1,18 @@
 import { z } from "zod";
 
 export const DomSelectorsSchema = z.object({
+  ROOT: z.string(),
   PAGE_WRAPPER: z.string(),
-  PAGE_CHILD_WRAPPER: z.string(),
   SIDEBAR: z.object({
     WRAPPER: z.string(),
     CHILD: z.object({
       MENU: z.string(),
     }),
     MOBILE_TRIGGER: z.string(),
+    PIN_SIDEBAR_BUTTON: z.string(),
   }),
   THREAD: z.object({
     NAVBAR: z.string(),
-    PAGE_WRAPPER: z.string(),
     WRAPPER: z.string(),
     MESSAGE_BLOCKS_WRAPPER: z.object({
       DESKTOP: z.object({
@@ -33,6 +33,7 @@ export const DomSelectorsSchema = z.object({
       }),
       STICKY_HEADER: z.string(),
       SOURCES: z.string(),
+      CONTENT_WRAPPER: z.string(),
       ANSWER: z.string(),
       ANSWER_TEXT_CONTENT: z.string(),
       FOOTER: z.string(),

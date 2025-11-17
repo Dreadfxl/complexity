@@ -4,7 +4,7 @@ import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 3;
 
-type ToasterToast = ToastProps & {
+type ToasterToast = Omit<ToastProps, "title" | "description"> & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -139,7 +139,7 @@ function dispatch(action: Action) {
   });
 }
 
-type Toast = Omit<ToasterToast, "id">;
+export type Toast = Omit<ToasterToast, "id">;
 
 export function toast({ ...props }: Toast) {
   const id = genId();
@@ -155,17 +155,42 @@ export function toast({ ...props }: Toast) {
     dispatch({ type: "DISMISS_TOAST", toastId: id });
   }
 
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: function (open) {
-        if (!open) dismiss();
+  // Check if adding this toast would exceed the limit
+  const currentToastCount = memoryState.toasts.length;
+  if (currentToastCount >= TOAST_LIMIT) {
+    // Dismiss the oldest toast first
+    const oldestToast = memoryState.toasts[memoryState.toasts.length - 1];
+    if (oldestToast) {
+      dispatch({ type: "DISMISS_TOAST", toastId: oldestToast.id });
+    }
+
+    // Delay adding the new toast to allow the old one to start sliding out
+    setTimeout(function () {
+      dispatch({
+        type: "ADD_TOAST",
+        toast: {
+          ...props,
+          id,
+          open: true,
+          onOpenChange: function (open) {
+            if (!open) dismiss();
+          },
+        },
+      });
+    }, 150); // Small delay to allow slide-out animation to start
+  } else {
+    dispatch({
+      type: "ADD_TOAST",
+      toast: {
+        ...props,
+        id,
+        open: true,
+        onOpenChange: function (open) {
+          if (!open) dismiss();
+        },
       },
-    },
-  });
+    });
+  }
 
   return {
     id: id,
@@ -177,18 +202,19 @@ export function toast({ ...props }: Toast) {
 export function useToast() {
   const [state, setState] = useState<State>(memoryState);
 
-  useEffect(
-    function () {
-      listeners.push(setState);
-      return function () {
-        const index = listeners.indexOf(setState);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-      };
-    },
-    [state],
-  );
+  const registerListener = useEffectEvent(() => {
+    listeners.push(setState);
+    return function () {
+      const index = listeners.indexOf(setState);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    };
+  });
+
+  useEffect(() => {
+    return registerListener();
+  }, []);
 
   return {
     ...state,

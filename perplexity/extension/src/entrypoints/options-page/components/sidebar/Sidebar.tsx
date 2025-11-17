@@ -1,12 +1,11 @@
-import type { ComponentProps } from "react";
+import { type ComponentProps } from "react";
 import { NavLink, useMatch } from "react-router-dom";
 
-import CometAffiliateCard from "@/components/CometAffiliateCard";
-import SponsorDialogWrapper from "@/components/SponsorDialogWrapper";
 import { type NavItem } from "@/entrypoints/options-page/components/sidebar/nav-items";
 import { useOptionsPageSidebarStore } from "@/entrypoints/options-page/components/sidebar/store";
 import Version from "@/entrypoints/options-page/components/sidebar/Version";
 import SidebarUpdateAnnouncer from "@/entrypoints/options-page/components/SidebarUpdateAnnouncer";
+import SponsorDialogWrapper from "@/entrypoints/options-page/components/SponsorDialogWrapper";
 
 import TablerChevronDown from "~icons/tabler/chevron-down";
 import TablerChevronRight from "~icons/tabler/chevron-right";
@@ -98,15 +97,13 @@ export default function Sidebar() {
       </div>
 
       <div className="x:sticky x:bottom-0 x:z-10 x:flex x:shrink-0 x:flex-col x:gap-4 x:bg-background x:p-4">
-        <CometAffiliateCard />
-
         <SidebarUpdateAnnouncer />
 
         <SponsorDialogWrapper>
           <div
             role="button"
             tabIndex={0}
-            className="x:group x:relative x:w-full x:cursor-pointer x:rounded-xl x:border x:border-border/50 x:bg-secondary x:p-4 x:text-sm x:text-muted-foreground x:shadow-lg x:transition-all x:hover:scale-101 x:hover:text-foreground x:md:text-balance"
+            className="x:group x:relative x:w-full x:cursor-pointer x:rounded-xl x:border x:border-border/50 x:bg-secondary x:p-4 x:text-sm x:text-foreground x:shadow-lg x:transition-all x:hover:scale-101 x:hover:text-foreground x:md:text-balance"
           >
             <Trans
               tKey="common.sidebar.supporterMessage"

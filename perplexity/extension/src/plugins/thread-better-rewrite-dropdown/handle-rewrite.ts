@@ -1,6 +1,6 @@
-import { produce } from "immer";
+import { create } from "mutative";
 
-import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-cache";
+import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-client";
 import { NetworkInterceptMiddlewareManagerService } from "@/plugins/__core__/_main-world/network-intercept/_service/service-init.loader";
 import {
   encodePerplexityAskEvent,
@@ -19,9 +19,11 @@ const remoteFiberConfig = await getVersionedRemoteResource(
 export const handleRewrite = ({
   selectedModel,
   messageBlockIndex,
+  redoSearch,
 }: {
   selectedModel: LanguageModelCode;
   messageBlockIndex: number;
+  redoSearch: boolean;
 }) => {
   NetworkInterceptMiddlewareManagerService.Root.addMiddleware({
     id: "instant-rewrite-model-change",
@@ -52,8 +54,11 @@ export const handleRewrite = ({
       );
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newParams = produce(parsedData.params, (draft: any) => {
+      const newParams = create(parsedData.params, (draft: any) => {
         draft.model_preference = selectedModel;
+        if (redoSearch) {
+          draft.redo_search = true;
+        }
       });
 
       const newEncodedPayload = encodePerplexityAskEvent({

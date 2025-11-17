@@ -42,13 +42,15 @@ function createAnchorData(
   target: HTMLElement,
   anchorElement: HTMLElement,
   options: Pick<
-    NonNullable<AnchorSlice["anchor"]["positioningOptions"]>,
+    NonNullable<AnchorSlice["positioningOptions"]>,
     "placement" | "gutter"
   >,
+  portalContainer: HTMLElement | null,
 ): {
   element: HTMLElement;
   inputField: HTMLElement;
-  positioningOptions: NonNullable<AnchorSlice["anchor"]["positioningOptions"]>;
+  positioningOptions: NonNullable<AnchorSlice["positioningOptions"]>;
+  portalContainer: HTMLElement | null;
   contentActions: ReturnType<typeof createTextboxAdapter>;
 } {
   return {
@@ -60,6 +62,7 @@ function createAnchorData(
       hideWhenDetached: true,
       getAnchorRect: () => anchorElement.getBoundingClientRect(),
     },
+    portalContainer,
     contentActions: createTextboxAdapter(target),
   };
 }
@@ -67,8 +70,12 @@ function createAnchorData(
 export function getAnchor(
   target: HTMLElement,
 ): Pick<
-  AnchorSlice["anchor"],
-  "element" | "inputField" | "positioningOptions" | "contentActions"
+  AnchorSlice,
+  | "element"
+  | "inputField"
+  | "positioningOptions"
+  | "portalContainer"
+  | "contentActions"
 > | null {
   if (isQueryBoxTextbox(target)) {
     const anchor = $(target).closest(
@@ -81,17 +88,27 @@ export function getAnchor(
       ["home", "collection"] as ReturnType<typeof whereAmI>[]
     ).includes(whereAmI());
 
-    return createAnchorData(target, anchor, {
-      gutter: 5,
-      placement: isHomePageTextbox ? "bottom" : "top",
-    });
+    return createAnchorData(
+      target,
+      anchor,
+      {
+        gutter: -1,
+        placement: isHomePageTextbox ? "bottom" : "top",
+      },
+      anchor,
+    );
   }
 
   if (isEditQueryBoxTextbox(target)) {
-    return createAnchorData(target, target, {
-      gutter: 10,
-      placement: "bottom",
-    });
+    return createAnchorData(
+      target,
+      target,
+      {
+        gutter: 10,
+        placement: "bottom",
+      },
+      null,
+    );
   }
 
   return null;

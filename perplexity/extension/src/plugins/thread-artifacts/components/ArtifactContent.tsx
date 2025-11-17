@@ -4,30 +4,30 @@ import ArtifactCodeView from "@/plugins/thread-artifacts/components/ArtifactCode
 import ArtifactPreview from "@/plugins/thread-artifacts/components/Preview";
 import { ARTIFACT_INITIAL_STATE } from "@/plugins/thread-artifacts/consts";
 import { useArtifactsStore } from "@/plugins/thread-artifacts/store";
-import type { ArtifactLanguage } from "@/plugins/thread-artifacts/types";
 import { getInterpretedArtifactLanguage } from "@/plugins/thread-artifacts/utils";
-import { PPLX_SCROLLBAR_CLASSES } from "@/utils/dom-utils/pplx-scrollbar-classes";
 
 export default function ArtifactContent() {
   const selectedCodeBlockLocation = useArtifactsStore(
-    (state) => state.selectedCodeBlockLocation,
+    (store) => store.selection.selectedCodeBlockLocation,
   );
   const selectedCodeBlock = useThreadCodeBlock({
     messageBlockIndex: selectedCodeBlockLocation?.messageBlockIndex,
     codeBlockIndex: selectedCodeBlockLocation?.codeBlockIndex,
   });
-
   const isInFlight = selectedCodeBlock?.states.isInFlight;
-  const artifactViewMode = useArtifactsStore((state) => state.state);
+  const artifactViewMode = useArtifactsStore((store) => store.states.view);
   const language = getInterpretedArtifactLanguage(
     selectedCodeBlock?.content.language ?? "text",
-  ) as ArtifactLanguage;
-  const previewKey = useArtifactsStore((state) => state.refreshPreviewKey);
-  const isValidArtifactCode = useArtifactsStore(
-    (state) => state.isValidArtifactCode,
   );
 
-  if (!isValidArtifactCode) return null;
+  const previewKey = useArtifactsStore(
+    (store) => store.preview.forceRefreshKey,
+  );
+  const isValidArtifactCode = useArtifactsStore(
+    (store) => store.states.isValidArtifactCode,
+  );
+
+  if (!isValidArtifactCode || !language) return null;
 
   return (
     <Tabs
@@ -37,7 +37,7 @@ export default function ArtifactContent() {
           ? "code"
           : artifactViewMode
       }
-      className={cn(PPLX_SCROLLBAR_CLASSES, "x:size-full x:overflow-auto")}
+      className={cn("custom-scrollbar", "x:size-full x:overflow-auto")}
     >
       <TabContent value="code" className="x:size-full">
         <ArtifactCodeView />

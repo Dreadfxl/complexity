@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { lazily } from "react-lazily";
-import { createHashRouter, redirect } from "react-router-dom";
+import { createHashRouter, Outlet, redirect } from "react-router-dom";
 
 import { APP_CONFIG } from "@/app.config";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import Page from "@/entrypoints/options-page/components/Page";
 import ErrorPage from "@/entrypoints/options-page/dashboard/pages/ErrorPage";
 import NotFoundPage from "@/entrypoints/options-page/dashboard/pages/NotFoundPage";
-import { PluginPageRoutes } from "@/entrypoints/options-page/dashboard/pages/plugins/routes";
+import { pluginPageRoutes } from "@/entrypoints/options-page/dashboard/pages/plugins/routes";
 import { ThemesPageRoutes } from "@/entrypoints/options-page/dashboard/pages/themes/routes";
 
 const { Playground } = lazily(
@@ -25,10 +25,10 @@ const { IndexPage: ReleaseNotesPage } = lazily(
     ),
 );
 
-const { DirectReleaseNotesPage } = lazily(
+const { FullScreenReleaseNotesPage } = lazily(
   () =>
     import(
-      "@/entrypoints/options-page/dashboard/pages/release-notes/DirectReleaseNotesPage"
+      "@/entrypoints/options-page/dashboard/pages/release-notes/FullScreenReleaseNotesPage"
     ),
 );
 
@@ -53,7 +53,8 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter([
         children: [
           {
             path: "plugins/*",
-            element: <Page title="Plugins" page={PluginPageRoutes} />,
+            element: <Page title="Plugins" page={Outlet} />,
+            children: pluginPageRoutes,
           },
           {
             path: "themes",
@@ -74,8 +75,13 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter([
         ],
       },
       {
-        path: "direct-release-notes",
-        element: <Page title="Release Notes" page={DirectReleaseNotesPage} />,
+        path: "fs-release-notes",
+        element: (
+          <Page
+            title="Complexity - Release Notes"
+            page={FullScreenReleaseNotesPage}
+          />
+        ),
         loader: ({ request }) => {
           const url = new URL(request.url);
           const version = url.searchParams.get("version");

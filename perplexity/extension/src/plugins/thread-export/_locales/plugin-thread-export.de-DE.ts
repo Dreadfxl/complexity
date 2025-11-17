@@ -9,11 +9,23 @@ export default {
   includeCitations: "Zitate einschließen",
   actions: {
     download: "Herunterladen",
+    largeFileDownloadPrompt: {
+      title: "Ihr Download ist bereit",
+      description: "Klicken Sie hier, um den Download zu starten",
+    },
     copy: "Kopieren",
+  },
+  waiting: {
+    title: "Bitte warten...",
+    description: "Inhalte werden extrahiert, dies kann einen Moment dauern",
   },
   errors: {
     downloadFailed: {
       title: "❌ Herunterladen fehlgeschlagen",
+      unknownError: "Unbekannter Fehler aufgetreten",
+    },
+    copyFailed: {
+      title: "❌ Kopieren fehlgeschlagen",
       unknownError: "Unbekannter Fehler aufgetreten",
     },
   },

@@ -20,7 +20,7 @@ export type PplxAuthSessionApiResponse = {
     image: string;
     id: string;
     username: string;
-    subscription_status: string;
+    subscription_status?: string;
     subscription_source: string;
     payment_tier: string;
     subscription_tier: string;
@@ -95,9 +95,26 @@ export type SpaceFileDownloadUrlApiResponse = z.infer<
   typeof SpaceFileDownloadUrlApiResponseSchema
 >;
 
+export const ThreadMessageTextSchema = z.object({
+  answer: z.string(),
+  web_results: z.array(
+    z.object({
+      name: z.string(),
+      url: z.string(),
+      snippet: z.string(),
+    }),
+  ),
+});
+
 export const ThreadMessageApiResponseSchema = z.object({
   query_str: z.string(),
-  text: z.string(),
+  text: z
+    .string()
+    .transform((value) => {
+      const parsed = JSON.parse(value);
+      return JSON.parse(parsed[parsed.length - 1].content.answer);
+    })
+    .pipe(ThreadMessageTextSchema),
   backend_uuid: z.string(),
   author_image: z.string().nullable(),
   author_username: z.string().nullable(),
@@ -109,6 +126,14 @@ export type ThreadMessageApiResponse = z.infer<
   typeof ThreadMessageApiResponseSchema
 >;
 
+export const ThreadApiResponseSchema = z.object({
+  entries: z.array(ThreadMessageApiResponseSchema),
+  has_next_page: z.boolean(),
+  next_cursor: z.string().nullable(),
+});
+
+export type ThreadApiResponse = z.infer<typeof ThreadApiResponseSchema>;
+
 export const ThreadSearchResponseApiSchema = z.object({
   thread_number: z.number(),
   last_query_datetime: z.string(),
@@ -116,12 +141,13 @@ export const ThreadSearchResponseApiSchema = z.object({
   context_uuid: z.string(),
   uuid: z.string(),
   slug: z.string(),
+  expiry_time: z.string().nullable(),
   title: z.string(),
   first_answer: z.string(),
   thread_access: z.number(),
   query_count: z.number(),
   search_focus: z.string(),
-  read_write_token: z.string(),
+  read_write_token: z.string().nullable().optional(),
   collection: SpaceSchema.pick({
     uuid: true,
     title: true,

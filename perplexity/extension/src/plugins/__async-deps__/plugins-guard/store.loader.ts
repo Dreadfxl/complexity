@@ -2,7 +2,7 @@ import { QueryObserver } from "@tanstack/react-query";
 
 import { isMobileStore } from "@/hooks/is-mobile-store";
 import { AsyncLoaderRegistry } from "@/plugins/__async-deps__/async-loaders";
-import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-cache";
+import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-client";
 import {
   pluginGuardsStore,
   type PluginGuardsStoreType,
@@ -23,13 +23,13 @@ declare module "@/plugins/__async-deps__/async-loaders" {
   }
 }
 
-export const getPplxAuthQueryObserver = () =>
+const getPplxAuthQueryObserver = () =>
   new QueryObserver(
     persistentQueryClient.queryClient,
     pplxApiQueries.auth.detail(),
   );
 
-export const getPplxAuthOrgStatusQueryObserver = () =>
+const getPplxAuthOrgStatusQueryObserver = () =>
   new QueryObserver(
     persistentQueryClient.queryClient,
     pplxApiQueries.auth.orgStatus.detail(),
@@ -102,7 +102,7 @@ function initAuthStatus({
     if (!isLoggedIn) return;
 
     const hasActiveSub =
-      userData.subscription_status != null &&
+      userData.subscription_status !== undefined &&
       userData.subscription_status !== "none";
 
     state.hasActiveSub = hasActiveSub;
@@ -129,34 +129,20 @@ function setupAuthenticationTracking(
     orgDetail: PplxOrgSettingsApiResponse;
   },
 ) {
-  if (authData.authDetail != null) {
-    initAuthStatus({ data: authData.authDetail, extensionSettings });
-  }
+  initAuthStatus({ data: authData.authDetail, extensionSettings });
 
   getPplxAuthQueryObserver().subscribe((data) => {
-    if (
-      data.status !== "success" ||
-      data.fetchStatus !== "idle" ||
-      data.data == null
-    )
-      return;
+    if (data.status !== "success" || data.fetchStatus !== "idle") return;
 
     initAuthStatus({ data: data.data, extensionSettings });
   });
 
-  if (authData.orgDetail != null) {
-    pluginGuardsStore.setState((state) => {
-      state.isOrgMember = authData.orgDetail.is_in_organization;
-    });
-  }
+  pluginGuardsStore.setState((state) => {
+    state.isOrgMember = authData.orgDetail.is_in_organization;
+  });
 
   getPplxAuthOrgStatusQueryObserver().subscribe((data) => {
-    if (
-      data.status !== "success" ||
-      data.fetchStatus !== "idle" ||
-      data.data == null
-    )
-      return;
+    if (data.status !== "success" || data.fetchStatus !== "idle") return;
 
     pluginGuardsStore.setState((state) => {
       state.isOrgMember = data.data.is_in_organization;
@@ -164,7 +150,7 @@ function setupAuthenticationTracking(
   });
 
   // const unsubscribeLoginGuard = pluginGuardsStore.subscribe(
-  //   (state) => state.isLoggedIn,
+  //   (store) => store.isLoggedIn,
   //   (isLoggedIn) => {
   //     if (isLoggedIn === false) return;
 

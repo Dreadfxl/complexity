@@ -37,9 +37,9 @@ export default function () {
 
       spaRouteChangeCompleteSubscribe((url) => {
         if (whereAmI(url) !== "thread")
-          artifactsStore.setState({
-            isArtifactsListOpen: false,
-            selectedCodeBlockLocation: null,
+          artifactsStore.setState((draft) => {
+            draft.ui.isArtifactsListOpen = false;
+            draft.selection.selectedCodeBlockLocation = null;
           });
       });
 
@@ -65,7 +65,9 @@ const initializeAutonomousMode = () => {
         getTotalBlocks(codeBlocksChunks) !==
         getTotalBlocks(prevCodeBlocksChunks)
       ) {
-        artifactsStore.getState().setLastAutoOpenCodeBlockLocation(null);
+        artifactsStore
+          .getState()
+          .selection.setLastAutoOpenCodeBlockLocation(null);
       }
     },
     {
@@ -85,7 +87,6 @@ const initializeAutonomousMode = () => {
           codeBlocksChunks.forEach((chunks, chunkIndex) => {
             chunks.forEach((codeBlock, codeBlockIndex) => {
               if (
-                codeBlock == null ||
                 !codeBlock.content.language ||
                 !isAutonomousArtifactLanguageString(codeBlock.content.language)
               )
@@ -96,7 +97,11 @@ const initializeAutonomousMode = () => {
                 codeBlock.content.language,
               );
 
-              if (!(interpretedLanguage in ARTIFACT_PLACEHOLDERS)) return;
+              if (
+                interpretedLanguage == null ||
+                !(interpretedLanguage in ARTIFACT_PLACEHOLDERS)
+              )
+                return;
 
               updateArtifactBlocks({
                 key,
@@ -110,7 +115,7 @@ const initializeAutonomousMode = () => {
           });
 
           artifactsStore.setState((draft) => {
-            draft.artifactBlocks = newArtifactBlocks;
+            draft.blocks.artifactBlocks = newArtifactBlocks;
           });
         },
         { timeout: 2000 },
@@ -166,9 +171,9 @@ const updateArtifactBlocks = ({
 
 const handleArtifactBlockClick = (location: CodeBlockLocation) => {
   artifactsStore.setState((draft) => {
-    draft.isArtifactsListOpen = false;
-    draft.selectedCodeBlockLocation = location;
-    draft.state = "preview";
+    draft.ui.isArtifactsListOpen = false;
+    draft.selection.selectedCodeBlockLocation = location;
+    draft.states.view = "preview";
 
     const selector = `${DomSelectorsService.Root.cplxAttribute(
       DomSelectorsService.Root.internalAttributes.THREAD.MESSAGE.BLOCK,
@@ -192,7 +197,7 @@ const closeOnRouteChange = () => {
       )
         return;
 
-      artifactsStore.getState().close();
+      artifactsStore.getState().selection.close();
     },
   );
 };
@@ -200,8 +205,9 @@ const closeOnRouteChange = () => {
 const emitResizeEvent = () => {
   artifactsStore.subscribe((state, prevState) => {
     if (
-      state.selectedCodeBlockLocation !== prevState.selectedCodeBlockLocation ||
-      state.isArtifactsListOpen !== prevState.isArtifactsListOpen
+      state.selection.selectedCodeBlockLocation !==
+        prevState.selection.selectedCodeBlockLocation ||
+      state.ui.isArtifactsListOpen !== prevState.ui.isArtifactsListOpen
     ) {
       setTimeout(() => window.dispatchEvent(new Event("resize")), 300);
     }

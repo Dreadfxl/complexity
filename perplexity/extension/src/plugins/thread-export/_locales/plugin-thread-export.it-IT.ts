@@ -9,11 +9,24 @@ export default {
   includeCitations: "Includi citazioni",
   actions: {
     download: "Scarica",
+    largeFileDownloadPrompt: {
+      title: "Il tuo download è pronto",
+      description: "Clicca qui per avviare il download",
+    },
     copy: "Copia",
+  },
+  waiting: {
+    title: "Per favore aspetta...",
+    description:
+      "Estrazione del contenuto, questo potrebbe richiedere un momento",
   },
   errors: {
     downloadFailed: {
       title: "❌ Download fallito",
+      unknownError: "Si è verificato un errore sconosciuto",
+    },
+    copyFailed: {
+      title: "❌ Copia fallita",
       unknownError: "Si è verificato un errore sconosciuto",
     },
   },

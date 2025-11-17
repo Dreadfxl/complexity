@@ -4,19 +4,19 @@ import { useMirroredCodeBlockContext } from "@/plugins/thread-better-code-blocks
 import BetterCodeBlockHeader from "@/plugins/thread-better-code-blocks/variants/base/Header";
 import HighlightedCodeWrapper from "@/plugins/thread-better-code-blocks/variants/HighlightedCode";
 
-const BaseCodeBlockWrapper = memo(function BaseCodeBlockWrapper() {
+export default function BaseCodeBlockWrapper() {
   const { maxHeight, maxWidth, sourceMessageBlockIndex, sourceCodeBlockIndex } =
     useMirroredCodeBlockContext();
 
   const isArtifactEnabled =
     PluginsStatesService.cachedEnableStates?.["thread:artifacts"];
   const selectedArtifactCodeBlockLocation = useArtifactsStore(
-    (state) => state.selectedCodeBlockLocation,
+    (store) => store.selection.selectedCodeBlockLocation,
   );
   const isSelectedArtifactCodeBlock =
     selectedArtifactCodeBlockLocation?.messageBlockIndex ===
       sourceMessageBlockIndex &&
-    selectedArtifactCodeBlockLocation?.codeBlockIndex === sourceCodeBlockIndex;
+    selectedArtifactCodeBlockLocation.codeBlockIndex === sourceCodeBlockIndex;
 
   return (
     <div
@@ -36,6 +36,4 @@ const BaseCodeBlockWrapper = memo(function BaseCodeBlockWrapper() {
       <HighlightedCodeWrapper />
     </div>
   );
-});
-
-export default BaseCodeBlockWrapper;
+}

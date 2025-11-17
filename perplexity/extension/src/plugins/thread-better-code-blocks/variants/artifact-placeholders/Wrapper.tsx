@@ -1,4 +1,3 @@
-import type { ArtifactLanguage } from "@/plugins/thread-artifacts/index.public";
 import { ARTIFACT_PLACEHOLDERS } from "@/plugins/thread-artifacts/index.public";
 import {
   artifactsStore,
@@ -13,17 +12,17 @@ import { useMirroredCodeBlockContext } from "@/plugins/thread-better-code-blocks
 
 import TablerLoaderCircle from "~icons/tabler/loader-2";
 
-const ArtifactPlaceholderWrapper = memo(function ArtifactPlaceholderWrapper() {
+export default function ArtifactPlaceholderWrapper() {
   const { codeBlock, sourceMessageBlockIndex, sourceCodeBlockIndex } =
     useMirroredCodeBlockContext();
 
   const selectedCodeBlockLocation = useArtifactsStore(
-    (state) => state.selectedCodeBlockLocation,
+    (store) => store.selection.selectedCodeBlockLocation,
   );
 
   const isSelected =
     selectedCodeBlockLocation?.messageBlockIndex === sourceMessageBlockIndex &&
-    selectedCodeBlockLocation?.codeBlockIndex === sourceCodeBlockIndex;
+    selectedCodeBlockLocation.codeBlockIndex === sourceCodeBlockIndex;
 
   const title = formatArtifactTitle(
     getArtifactTitle(codeBlock?.content.language),
@@ -32,10 +31,9 @@ const ArtifactPlaceholderWrapper = memo(function ArtifactPlaceholderWrapper() {
     codeBlock?.content.language ?? "",
   );
 
-  const placeholderElements =
-    ARTIFACT_PLACEHOLDERS[interpretedLanguage as ArtifactLanguage];
+  if (interpretedLanguage == null) return null;
 
-  if (placeholderElements == null) return null;
+  const placeholderElements = ARTIFACT_PLACEHOLDERS[interpretedLanguage];
 
   return (
     <div
@@ -47,12 +45,12 @@ const ArtifactPlaceholderWrapper = memo(function ArtifactPlaceholderWrapper() {
       )}
       onClick={() => {
         artifactsStore.setState((draft) => {
-          draft.selectedCodeBlockLocation = {
+          draft.selection.selectedCodeBlockLocation = {
             messageBlockIndex: sourceMessageBlockIndex,
             codeBlockIndex: sourceCodeBlockIndex,
           };
-          draft.state = "preview";
-          draft.isArtifactsListOpen = false;
+          draft.states.view = "preview";
+          draft.ui.isArtifactsListOpen = false;
         });
       }}
     >
@@ -91,6 +89,4 @@ const ArtifactPlaceholderWrapper = memo(function ArtifactPlaceholderWrapper() {
       </div>
     </div>
   );
-});
-
-export default ArtifactPlaceholderWrapper;
+}

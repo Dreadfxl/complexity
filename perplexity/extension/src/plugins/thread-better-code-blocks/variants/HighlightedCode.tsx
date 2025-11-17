@@ -10,9 +10,9 @@ import { getBetterCodeBlockOptions } from "@/plugins/thread-better-code-blocks/u
 import { ExtensionSettingsService } from "@/services/infra/extension-api-wrappers/extension-settings";
 import type { ExtensionSettings } from "@/services/infra/extension-api-wrappers/extension-settings/types";
 
-const HighlightedCodeWrapper = memo(() => {
+export default function HighlightedCodeWrapper() {
   const colorScheme = useColorSchemeStore(
-    (state) => state.colorScheme,
+    (store) => store.colorScheme,
     deepEqual,
   );
 
@@ -22,9 +22,8 @@ const HighlightedCodeWrapper = memo(() => {
   const code = codeBlock?.content.code ?? "";
   const language = codeBlock?.content.language;
 
-  const interpretedLanguage = getInterpretedArtifactLanguage(
-    language ?? "text",
-  );
+  const interpretedLanguage =
+    getInterpretedArtifactLanguage(language ?? "text") ?? language;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const codeRef = useRef<HTMLDivElement>(null);
@@ -42,7 +41,7 @@ const HighlightedCodeWrapper = memo(() => {
   if (!codeBlock) return null;
 
   const showLineNumbers =
-    fineGrainedSettings?.showLineNumbers ?? globalSettings?.showLineNumbers;
+    fineGrainedSettings?.showLineNumbers ?? globalSettings.showLineNumbers;
 
   return (
     <div
@@ -75,13 +74,11 @@ const HighlightedCodeWrapper = memo(() => {
       </div>
     </div>
   );
-});
+}
 
 function PreTag({ children }: { children: ReactNode }) {
   return <pre className="x:px-4 x:py-2">{children}</pre>;
 }
-
-export default HighlightedCodeWrapper;
 
 function useOverflowing({
   wrapperRef,

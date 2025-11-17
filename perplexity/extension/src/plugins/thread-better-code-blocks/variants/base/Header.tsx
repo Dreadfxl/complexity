@@ -10,7 +10,7 @@ import { ExtensionSettingsService } from "@/services/infra/extension-api-wrapper
 
 import TablerLoaderCircle from "~icons/tabler/loader-2";
 
-const BaseCodeBlockWrapperHeader = memo(function BaseCodeBlockWrapperHeader() {
+export default function BaseCodeBlockWrapperHeader() {
   const { codeBlock, isHorizontalOverflowing, isVerticalOverflowing } =
     useMirroredCodeBlockContext();
 
@@ -52,9 +52,9 @@ const BaseCodeBlockWrapperHeader = memo(function BaseCodeBlockWrapperHeader() {
       <div className="x:flex x:items-center x:gap-4">
         {isInFlight ? (
           <div className="x:flex x:items-center x:gap-2">
-            {fineGrainedSettings?.placeholderText?.loading && (
+            {fineGrainedSettings?.placeholderText.loading && (
               <div className="x:animate-pulse">
-                {fineGrainedSettings?.placeholderText?.loading}
+                {fineGrainedSettings.placeholderText.loading}
               </div>
             )}
             <TablerLoaderCircle className="x:size-4 x:animate-spin" />
@@ -77,6 +77,4 @@ const BaseCodeBlockWrapperHeader = memo(function BaseCodeBlockWrapperHeader() {
       </div>
     </div>
   );
-});
-
-export default BaseCodeBlockWrapperHeader;
+}

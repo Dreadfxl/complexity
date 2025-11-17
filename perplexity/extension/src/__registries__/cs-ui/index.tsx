@@ -82,36 +82,13 @@ export default class CsUiRegistry {
       CsUiRegistry.Components,
     );
 
-  static CommandMenuItemsGroupComponents = (() =>
+  static ThreadNavbarAttributesGroupComponents = (() =>
     CsUiRegistry.Components.map((module, idx) => {
       if (module.uiGroup == null) return null;
 
       if (
         typeof module.uiGroup === "string" &&
-        module.uiGroup === "commandMenu"
-      )
-        return <module.default key={idx} />;
-
-      if (
-        Array.isArray(module.uiGroup) &&
-        module.uiGroup.includes("commandMenu")
-      )
-        return <module.default key={idx} />;
-    }).filter((component) => component != null))();
-
-  static SlashCommandMenuPagesGroupComponents = (() =>
-    CsUiRegistry.Components.map((module, idx) => {
-      if (module.uiGroup == null) return null;
-
-      if (
-        typeof module.uiGroup === "string" &&
-        module.uiGroup === "slashCommandMenu:pages"
-      )
-        return <module.default key={idx} />;
-
-      if (
-        Array.isArray(module.uiGroup) &&
-        module.uiGroup.includes("slashCommandMenu:pages")
+        module.uiGroup === "thread:navbarAttributes"
       )
         return <module.default key={idx} />;
     }).filter((component) => component != null))();
@@ -119,16 +96,6 @@ export default class CsUiRegistry {
 
 (function () {
   CsUiRegistry.Components.forEach((module) => {
-    invariant(
-      module.default != null,
-      "Plugin Component must have a default export",
-    );
-
-    invariant(
-      typeof module.default === "function",
-      "Plugin Component must be a fuwwnction",
-    );
-
     invariant(
       module.default.displayName,
       "Plugin Component must have a displayName",

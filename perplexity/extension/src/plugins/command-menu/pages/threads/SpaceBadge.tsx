@@ -10,13 +10,16 @@ export default function SpaceBadge({
   space: NonNullable<ThreadSearchResponseApi["collection"]>;
 }) {
   return (
-    <Badge variant="outline" className="x:max-w-[200px] x:cursor-pointer">
+    <Badge
+      variant="outline"
+      className="x:max-w-[200px] x:cursor-pointer x:rounded-xl"
+    >
       <div
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           void softNavigate(`/spaces/${space.slug}`);
-          commandMenuStore.getState().setOpen(false);
+          commandMenuStore.getState().states.setOpen(false);
         }}
       >
         <div className="x:flex x:items-center x:gap-2">

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import type { ButtonProps } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 type AsyncButtonProps = Omit<ButtonProps, "onClick"> & {
   onClick: () => Promise<void>;
@@ -21,9 +22,14 @@ export default function AsyncButton({
     setIsLoading(true);
     try {
       await onClick();
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      });
     }
+    setIsLoading(false);
   };
 
   return (

@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import { lazily } from "react-lazily";
 
-import type { UiGroupId } from "@/__registries__/cs-ui/types";
 import { CommandItemSkeleton } from "@/components/ui/command";
-import { withPluginsGuard } from "@/plugins/__async-deps__/plugins-guard/withPluginsGuard";
+import CsUiPluginsGuard from "@/plugins/__async-deps__/plugins-guard/CsUiPluginsGuard";
 import CommandPage from "@/plugins/__core__/slash-command/components/CommandPage";
+import { SlashCommandExternalPage } from "@/plugins/__core__/slash-command/pages/ExternalPages";
 
 const { PromptHistoryCommandMenuContent } = lazily(
   () => import("@/plugins/prompt-history/slash-command/CommandMenuContent"),
@@ -15,25 +16,26 @@ declare module "@/plugins/__core__/slash-command/store/slices/pages/types" {
   }
 }
 
-export const PromptHistoryPage = withPluginsGuard(
-  memo(() => {
-    return (
-      <CommandPage pageId="promptHistory">
-        <PromptHistoryCommandMenuContent />
-      </CommandPage>
-    );
-  }),
-  {
-    dependentPluginIds: ["promptHistory"],
-    suspenseFallback: (
-      <CommandItemSkeleton
-        count={5}
-        className="x:h-8 x:bg-muted-foreground/20"
-      />
-    ),
-  },
-);
+export default function PromptHistorySlashCommandPageWrapper() {
+  return (
+    <CsUiPluginsGuard dependentPluginIds={["promptHistory"]}>
+      <SlashCommandExternalPage>
+        <CommandPage pageId="promptHistory">
+          <Suspense
+            fallback={
+              <CommandItemSkeleton
+                count={5}
+                className="x:h-8 x:bg-muted-foreground/20"
+              />
+            }
+          >
+            <PromptHistoryCommandMenuContent />
+          </Suspense>
+        </CommandPage>
+      </SlashCommandExternalPage>
+    </CsUiPluginsGuard>
+  );
+}
 
-export const uiGroup: UiGroupId = "slashCommandMenu:pages";
-
-export default PromptHistoryPage;
+PromptHistorySlashCommandPageWrapper.displayName =
+  "PromptHistorySlashCommandPageWrapper";

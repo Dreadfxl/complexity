@@ -15,7 +15,7 @@ export function ExtensionContextInvalidationWatchdog() {
   const { data: isValidContext, refetch } = useQuery({
     queryKey: ["extensionContextInvalidationWatchdog"],
     queryFn: () => {
-      return chrome.runtime.id != null;
+      return (chrome.runtime.id as string | null) != null;
     },
     refetchInterval: ms("10s"),
     refetchOnReconnect: "always",
@@ -56,7 +56,7 @@ export function WarningDialog() {
         </DialogDescription>
         <DialogFooter>
           <DialogClose asChild>
-            <Button>I'll do it later</Button>
+            <Button>I will do it later</Button>
           </DialogClose>
           <Button
             autoFocus

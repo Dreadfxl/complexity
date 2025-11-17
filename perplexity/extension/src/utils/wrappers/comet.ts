@@ -3,7 +3,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { ContentScriptBgUtilsService } from "@/services/features/content-script-utils/service-init.bg-worker";
 import { whereAmI } from "@/utils/misc/utils";
-import { errorWrapper } from "@/utils/wrappers/error-wrapper";
 
 export function isCometBrowserSync(): boolean {
   if (APP_CONFIG.BROWSER !== "chrome") return false;
@@ -37,19 +36,20 @@ export async function isCsInjectable(): Promise<boolean | null> {
   const tabs = await chrome.tabs.query({});
 
   for (const tab of tabs) {
-    if (tab.id == null || tab.url == null || tab.url.length === 0) continue;
+    const tabId = tab.id;
+
+    if (tabId == null || tab.url == null || tab.url.length === 0) continue;
 
     if (whereAmI(tab.url) === "unknown") continue;
 
-    const [, error] = await errorWrapper(
-      async () =>
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id! },
-          func: () => {},
-        }),
-    )();
+    const [, error] = await tryCatch(async () =>
+      chrome.scripting.executeScript({
+        target: { tabId },
+        func: () => {},
+      }),
+    );
 
-    if (error) {
+    if (error && error.message.includes("ExtensionsSettings policy")) {
       return false;
     }
 

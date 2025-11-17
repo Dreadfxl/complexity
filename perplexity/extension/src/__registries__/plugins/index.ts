@@ -51,7 +51,7 @@ export class PluginManifestsRegistry {
       visited.add(id);
 
       const plugin = this.meta[id];
-      const deps = plugin?.dependencies?.plugins;
+      const deps = plugin.dependencies?.plugins;
 
       if (deps) {
         for (const depId of deps) {
@@ -167,14 +167,12 @@ export class PluginManifestsRegistry {
 }
 
 (function () {
-  const entries = import.meta.glob("@/plugins/**/index.manifest.ts", {
+  const entries = import.meta.glob("@/plugins/*/index.manifest.ts", {
     eager: true,
   }) as Record<string, Record<string, unknown>>;
 
   const sortedEntries = Object.entries(entries)
     .map(([path, module]) => {
-      invariant("default" in module, `Plugin "${path}" has no default export`);
-
       const params = module.default as PluginManifest<
         keyof PluginsSettingsRegistry
       >;
@@ -220,7 +218,7 @@ export class PluginManifestsRegistry {
       const allDeps = new Set<PluginId>();
       const plugin = PluginManifestsRegistry.meta[pluginId];
 
-      if (plugin?.dependencies?.plugins) {
+      if (plugin.dependencies?.plugins) {
         for (const dep of plugin.dependencies.plugins) {
           allDeps.add(dep);
           const transitiveDeps = visit(dep, path);

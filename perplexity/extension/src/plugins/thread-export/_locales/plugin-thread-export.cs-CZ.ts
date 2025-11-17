@@ -9,11 +9,23 @@ export default {
   includeCitations: "Zahrnout citace",
   actions: {
     download: "Stáhnout",
+    largeFileDownloadPrompt: {
+      title: "Vaše stažení je připraveno",
+      description: "Klikněte zde pro zahájení stažení",
+    },
     copy: "Kopírovat",
+  },
+  waiting: {
+    title: "Prosím počkejte...",
+    description: "Extrahování obsahu, to může chvíli trvat",
   },
   errors: {
     downloadFailed: {
       title: "❌ Stahování selhalo",
+      unknownError: "Došlo k neznámé chybě",
+    },
+    copyFailed: {
+      title: "❌ Kopírování selhalo",
       unknownError: "Došlo k neznámé chybě",
     },
   },

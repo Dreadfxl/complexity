@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import type { PluginId } from "@/__registries__/plugins/meta.types";
 import { Switch } from "@/components/ui/switch";
@@ -21,22 +21,17 @@ export default function BetterCodeBlocksPluginSettingsUi() {
     betterCodeBlocksFineGrainedOptionsQueries.list.detail(),
   );
 
-  const isFromPluginList = useLocation().state?.fromPluginList;
-
   return (
     <div className="x:flex x:flex-col x:gap-4">
       <Header />
 
-      {settings?.plugins["thread:betterCodeBlocks"].enabled && (
+      {settings.plugins["thread:betterCodeBlocks"].enabled && (
         <Tabs
           value={activeTab}
           onValueChange={({ value }) => {
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set("tab", value);
             setSearchParams(newSearchParams, {
-              state: {
-                fromPluginList: isFromPluginList,
-              },
               replace: true,
             });
           }}
@@ -81,7 +76,7 @@ function Header() {
       </div>
       <Switch
         textLabel="Enable"
-        checked={settings?.plugins["thread:betterCodeBlocks"].enabled}
+        checked={settings.plugins["thread:betterCodeBlocks"].enabled}
         onCheckedChange={({ checked }) => {
           mutation.mutate((draft) => {
             draft.plugins["thread:betterCodeBlocks"].enabled = checked;

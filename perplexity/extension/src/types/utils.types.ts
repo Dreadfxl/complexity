@@ -1,5 +1,6 @@
 import React from "react";
 import { ZodError } from "zod";
+import type { StateCreator } from "zustand/vanilla";
 
 export type Nullable<T> = T | null;
 
@@ -7,6 +8,10 @@ export type MaybePromise<T> = T | Promise<T>;
 
 export type RemoveNull<T, K extends keyof T = never> = {
   [P in keyof T]: P extends K ? (T[P] extends infer U | null ? U : T[P]) : T[P];
+};
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
 export function isNotNumber(value: unknown): boolean {
@@ -32,7 +37,14 @@ export function isReactNode(node: unknown): node is React.ReactNode {
 export function isZodError(error: unknown): error is ZodError {
   return (
     error instanceof ZodError ||
-    (error as ZodError)?.name === "ZodError" ||
-    Array.isArray((error as ZodError)?.issues)
+    (error as ZodError).name === "ZodError" ||
+    Array.isArray((error as ZodError).issues)
   );
 }
+
+export type SliceCreator<Slice, Store> = StateCreator<
+  Store,
+  [["zustand/subscribeWithSelector", never], ["zustand/mutative", never]],
+  [],
+  Slice
+>;

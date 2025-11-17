@@ -1,7 +1,7 @@
 import { QueryObserver } from "@tanstack/react-query";
 
 import { AsyncLoaderRegistry } from "@/plugins/__async-deps__/async-loaders";
-import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-cache";
+import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-client";
 import { pluginGuardsStore } from "@/plugins/__async-deps__/plugins-guard/store";
 import { imageGenModelSelectorStore } from "@/plugins/image-gen-model-selector/store";
 import { isImageModelCode } from "@/services/externals/cplx-api/remote-resources/pplx-image-models/types";
@@ -27,7 +27,7 @@ export default function () {
 
 function initImageGenModelSelectorStore() {
   const unsubscribeLoginGuard = pluginGuardsStore.subscribe(
-    (state) => state.isLoggedIn,
+    (store) => store.isLoggedIn,
     (isLoggedIn) => {
       if (isLoggedIn === false) return;
 

@@ -1,5 +1,5 @@
 import { AsyncLoaderRegistry } from "@/plugins/__async-deps__/async-loaders";
-import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-cache";
+import { persistentQueryClient } from "@/plugins/__async-deps__/persistent-query-client";
 import { commandMenuStore } from "@/plugins/command-menu/index.public";
 import {
   alwaysHideRelatedQuestionsCssResourceConfig,
@@ -70,6 +70,6 @@ function setupKeybinding() {
     event.stopImmediatePropagation();
     event.preventDefault();
     toggleZenMode();
-    commandMenuStore.getState().setOpen(false);
+    commandMenuStore.getState().states.setOpen(false);
   });
 }

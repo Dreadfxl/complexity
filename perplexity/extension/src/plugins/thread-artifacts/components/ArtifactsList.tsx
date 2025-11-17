@@ -8,7 +8,9 @@ import TablerLoaderCircle from "~icons/tabler/loader-2";
 import TablerX from "~icons/tabler/x";
 
 export default function ArtifactsList() {
-  const artifactBlocks = useArtifactsStore((state) => state.artifactBlocks);
+  const artifactBlocks = useArtifactsStore(
+    (store) => store.blocks.artifactBlocks,
+  );
 
   return (
     <div className="x:flex x:size-full x:flex-col x:gap-4">
@@ -20,7 +22,7 @@ export default function ArtifactsList() {
           variant="ghost"
           size="iconSm"
           onClick={() => {
-            artifactsStore.getState().closeArtifactsList();
+            artifactsStore.getState().ui.closeArtifactsList();
           }}
         >
           <TablerX className="x:size-4 x:text-muted-foreground" />
@@ -60,12 +62,12 @@ export default function ArtifactsList() {
                       </span>
                     ) : (
                       <>
-                        <span className="x:hidden x:text-sm x:text-muted-foreground x:lg:block">
+                        <span className="x:text-sm x:text-muted-foreground">
                           {description}
                         </span>
                         {count > 1 && (
                           <span className="x:flex x:items-center x:gap-1 x:text-sm x:text-muted-foreground">
-                            <span className="x:hidden x:lg:block">•</span>
+                            <span>•</span>
                             {t("plugin-artifacts.list.versions", { count })}
                           </span>
                         )}

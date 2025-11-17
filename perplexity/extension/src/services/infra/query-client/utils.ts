@@ -69,6 +69,9 @@ function shouldDehydrateQuery(
 ): boolean {
   const queryKey = query.queryKey;
 
+  // Only persist queries that are truly cacheable
+  if (query.state.status !== "success") return false;
+
   if (excludeKeys.some((exclude) => queryKey.includes(exclude))) {
     return false;
   }
@@ -101,6 +104,23 @@ export const debouncedPersistQueryClient = debounce(
       dehydrateOptions: {
         shouldDehydrateQuery: (query) =>
           shouldDehydrateQuery(query, { excludeKeys, includeKeys }),
+        serializeData: (data) => {
+          // Only persist the first page of infinite queries
+          if (
+            data != null &&
+            typeof data === "object" &&
+            "pages" in data &&
+            "pageParams" in data &&
+            Array.isArray(data.pages) &&
+            Array.isArray(data.pageParams)
+          ) {
+            return {
+              pages: [data.pages[0]],
+              pageParams: [data.pageParams[0]],
+            };
+          }
+          return data;
+        },
       },
     });
   },
